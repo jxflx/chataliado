@@ -1,0 +1,26 @@
+version: "1.0"
+
+handoff_keywords:
+  - humano
+  - persona
+  - nutriólogo
+  - nutriologo
+  - doctor
+  - queja
+  - molesto
+  - enojado
+  - diagnóstico
+  - diagnostico
+  - receta
+  - medicamento
+  - enfermedad
+  - dieta para
+
+disclaimer: "Soy un asistente automatizado y no sustituyo al profesional. Puedo ayudarte con información de servicios, precios y citas."
+
+messages:
+  handoff_keyword: "Entiendo. Voy a transferir tu conversación para que te atienda una persona del equipo. En breve te contactarán."
+  services_empty: "Aún no tengo información de precios cargada. {disclaimer}"
+  appointment_help: "Con gusto te ayudo a agendar una cita. Por favor indícame tu nombre completo y el servicio que te interesa, y te compartiré los horarios disponibles desde el sistema."
+  greeting: "¡Hola! Bienvenido a {business_name}. {disclaimer} ¿En qué puedo ayudarte?"
+  unknown: "Disculpa, no estoy seguro de haber entendido tu mensaje. Puedo ayudarte con información de servicios, precios y citas. Si prefieres hablar con una persona, dime 'quiero hablar con una persona'."

@@ -1,0 +1,16 @@
+# Virtualenv & Python
+.venv/
+__pycache__/
+*.pyc
+.env
+*.db
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+
+# Internal PM, Agent Configs & Graphify (Private)
+Project Management/
+.agents/
+graphify-out/
+GEMINI.md
+ESTADO_MVP.md

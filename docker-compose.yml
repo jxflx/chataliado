@@ -1,0 +1,17 @@
+# PostgreSQL local para cuando se migre desde SQLite (requiere Docker).
+# Uso: docker compose up -d
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: chataliado
+      POSTGRES_PASSWORD: chataliado
+      POSTGRES_DB: chataliado
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
+

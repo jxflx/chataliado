@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChatAliado — Chat simulado</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header><h1>Chat simulado (rol: paciente)</h1></header>
+  <main style="max-width: 560px">
+    <section class="panel">
+      <div class="row">
+        <input id="c-business" type="number" min="1" value="1" placeholder="ID del negocio">
+        <input id="c-name" placeholder="Tu nombre">
+        <input id="c-phone" placeholder="Tu teléfono">
+      </div>
+      <div class="chat-box" id="chat-box"></div>
+      <div class="row">
+        <input id="c-text" placeholder="Escribe un mensaje..." style="flex:3">
+        <button class="primary" id="c-send">Enviar</button>
+      </div>
+      <p class="error" id="c-error"></p>
+      <p><small>Este chat simula WhatsApp. Prueba: "hola", "¿cuánto cuesta?", "quiero una cita",
+      "quiero hablar con una persona".</small></p>
+    </section>
+  </main>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const box = $("chat-box");
+
+    function addMsg(text, cls) {
+      const div = document.createElement("div");
+      div.className = `msg ${cls}`;
+      div.textContent = text;
+      box.appendChild(div);
+      box.scrollTop = box.scrollHeight;
+    }
+
+    $("c-send").onclick = async () => {
+      $("c-error").textContent = "";
+      const text = $("c-text").value.trim();
+      if (!text) return;
+      try {
+        const res = await fetch("/simulated-chat/messages", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            business_id: parseInt($("c-business").value),
+            patient_name: $("c-name").value,
+            patient_phone: $("c-phone").value,
+            text,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          const msg = data?.error?.message || data?.detail?.[0]?.msg || "Error";
+          throw new Error(typeof msg === "string" ? msg : JSON.stringify(msg));
+        }
+        addMsg(text, "patient");
+        $("c-text").value = "";
+        if (data.bot_reply) addMsg(data.bot_reply, "bot");
+        else addMsg("(el bot no responde: una persona atiende esta conversación)", "staff");
+      } catch (e) { $("c-error").textContent = e.message; }
+    };
+
+    $("c-text").addEventListener("keydown", (e) => { if (e.key === "Enter") $("c-send").click(); });
+  </script>
+</body>
+</html>

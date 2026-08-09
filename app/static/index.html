@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChatAliado — Dashboard</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header>
+    <h1>ChatAliado — Dashboard</h1>
+    <div>
+      <span id="user-info"></span>
+      <button class="secondary hidden" id="logout-btn">Salir</button>
+    </div>
+  </header>
+  <main>
+    <!-- LOGIN / REGISTRO -->
+    <section class="panel" id="auth-panel">
+      <div class="row">
+        <div>
+          <h2>Iniciar sesión</h2>
+          <input id="login-email" type="email" placeholder="Email">
+          <input id="login-password" type="password" placeholder="Contraseña">
+          <button class="primary" id="login-btn">Entrar</button>
+        </div>
+        <div>
+          <h2>Registrar negocio</h2>
+          <input id="reg-business" placeholder="Nombre del negocio">
+          <input id="reg-name" placeholder="Tu nombre completo">
+          <input id="reg-email" type="email" placeholder="Email">
+          <input id="reg-password" type="password" placeholder="Contraseña (mín. 8)">
+          <button class="primary" id="register-btn">Registrar</button>
+        </div>
+      </div>
+      <p class="error" id="auth-error"></p>
+    </section>
+
+    <!-- APP -->
+    <div id="app" class="hidden">
+      <div id="pending-alert" class="alert hidden"></div>
+      <nav class="tabs">
+        <button data-tab="appointments" class="active">Citas</button>
+        <button data-tab="conversations">Conversaciones</button>
+        <button data-tab="services">Servicios</button>
+        <button data-tab="availability">Horarios</button>
+      </nav>
+      <p class="error" id="app-error"></p>
+
+      <section class="panel" id="tab-appointments">
+        <h2>Nueva cita</h2>
+        <div class="row">
+          <select id="apt-patient"></select>
+          <select id="apt-service"></select>
+          <input id="apt-start" type="datetime-local">
+          <button class="primary" id="apt-create">Crear cita</button>
+        </div>
+        <p><button class="secondary" id="apt-slots">Ver horarios disponibles (7 días)</button></p>
+        <div id="slots-list"></div>
+        <h2>Citas</h2>
+        <table><thead><tr><th>Paciente</th><th>Servicio</th><th>Inicio</th><th>Estado</th><th></th></tr></thead>
+        <tbody id="appointments-body"></tbody></table>
+      </section>
+
+      <section class="panel hidden" id="tab-conversations">
+        <div class="row">
+          <div style="flex:1">
+            <h2>Conversaciones</h2>
+            <table><thead><tr><th>Paciente</th><th>Estado</th><th>Última actividad</th></tr></thead>
+            <tbody id="conversations-body"></tbody></table>
+          </div>
+          <div style="flex:1.4" id="conv-detail" class="hidden">
+            <h2 id="conv-title">Conversación</h2>
+            <div class="chat-box" id="conv-messages"></div>
+            <div class="row">
+              <input id="staff-text" placeholder="Responder como el negocio...">
+              <button class="primary" id="staff-send">Enviar</button>
+            </div>
+            <p>
+              <button class="secondary" id="conv-takeover">Tomar control</button>
+              <button class="secondary" id="conv-close">Cerrar conversación</button>
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel hidden" id="tab-services">
+        <h2>Nuevo servicio</h2>
+        <div class="row">
+          <input id="svc-name" placeholder="Nombre">
+          <input id="svc-price" type="number" min="0" placeholder="Precio MXN">
+          <input id="svc-duration" type="number" min="5" step="5" placeholder="Duración (min)">
+          <select id="svc-modality">
+            <option value="in_person">Presencial</option>
+            <option value="online">En línea</option>
+          </select>
+          <button class="primary" id="svc-create">Crear</button>
+        </div>
+        <h2>Servicios</h2>
+        <table><thead><tr><th>Nombre</th><th>Precio</th><th>Duración</th><th>Modalidad</th><th>Activo</th><th></th></tr></thead>
+        <tbody id="services-body"></tbody></table>
+      </section>
+
+      <section class="panel hidden" id="tab-availability">
+        <h2>Reglas semanales de atención</h2>
+        <div id="rules-editor"></div>
+        <p>
+          <button class="secondary" id="rule-add">Añadir bloque</button>
+          <button class="primary" id="rules-save">Guardar reglas</button>
+        </p>
+        <h2>Periodos bloqueados</h2>
+        <div class="row">
+          <input id="blk-start" type="datetime-local">
+          <input id="blk-end" type="datetime-local">
+          <input id="blk-reason" placeholder="Motivo">
+          <button class="primary" id="blk-create">Bloquear</button>
+        </div>
+        <table><thead><tr><th>Inicio</th><th>Fin</th><th>Motivo</th><th></th></tr></thead>
+        <tbody id="blocked-body"></tbody></table>
+        <h2>Nuevo paciente</h2>
+        <div class="row">
+          <input id="pat-name" placeholder="Nombre completo">
+          <input id="pat-phone" placeholder="Teléfono">
+          <button class="primary" id="pat-create">Crear paciente</button>
+        </div>
+      </section>
+    </div>
+  </main>
+  <script src="/static/app.js"></script>
+</body>
+</html>
