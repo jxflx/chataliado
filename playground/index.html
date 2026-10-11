@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-slate-950 text-slate-100">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChatAliado — Interactive Local Development Playground & Simulator</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            wa: {
+              bg: '#0b141a',
+              bubbleIn: '#202c33',
+              bubbleOut: '#005c4b',
+              green: '#25d366',
+              accent: '#00a884',
+              teal: '#128c7e',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Marked.js CDN for Markdown rendering -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="./css/custom.css">
+</head>
+<body class="h-full flex flex-col overflow-hidden select-none bg-slate-950 font-sans">
+
+  <!-- ========================================================================= -->
+  <!-- TOP HEADER -->
+  <!-- ========================================================================= -->
+  <header class="h-14 bg-slate-900 border-b border-slate-800 px-4 flex items-center justify-between shrink-0 z-30 shadow-md">
+    <div class="flex items-center space-x-3">
+      <div class="flex items-center space-x-2">
+        <span class="text-2xl">🍕</span>
+        <div>
+          <h1 class="text-base font-bold tracking-tight text-white flex items-center gap-2">
+            ChatAliado
+            <span class="text-xs px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-semibold border border-emerald-500/30">
+              Playground & Simulator
+            </span>
+          </h1>
+        </div>
+      </div>
+
+      <!-- DEV_ONLY Badge -->
+      <span class="hidden md:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30 pulse-amber">
+        ⚠️ DEV ONLY — LOCAL SIMULATOR
+      </span>
+    </div>
+
+    <!-- Center / Status Indicators -->
+    <div class="flex items-center space-x-4 text-xs font-medium">
+      <!-- Worker status -->
+      <div id="worker-status-badge" class="flex items-center space-x-1.5 px-2.5 py-1 rounded bg-slate-800 border border-slate-700 text-slate-300">
+        <span id="worker-status-dot" class="w-2 h-2 rounded-full bg-slate-500"></span>
+        <span class="text-slate-400">Worker:</span>
+        <span id="worker-status-text" class="font-mono text-slate-200">Checking...</span>
+      </div>
+
+      <!-- Supabase status -->
+      <div id="supabase-status-badge" class="hidden sm:flex items-center space-x-1.5 px-2.5 py-1 rounded bg-slate-800 border border-slate-700 text-slate-300">
+        <span id="supabase-status-dot" class="w-2 h-2 rounded-full bg-slate-500"></span>
+        <span class="text-slate-400">Supabase:</span>
+        <span id="supabase-status-text" class="font-mono text-slate-200">Checking...</span>
+      </div>
+
+      <!-- Restaurant Selector -->
+      <div class="flex items-center space-x-1.5">
+        <label for="restaurant-select" class="text-slate-400 hidden lg:inline">Restaurante:</label>
+        <select id="restaurant-select" class="bg-slate-800 border border-slate-700 text-slate-200 rounded px-2.5 py-1 text-xs focus:outline-none focus:border-emerald-500">
+          <option value="don-giovanni" selected>Pizzería Don Giovanni (don-giovanni)</option>
+          <option value="tacos-el-pastor">Tacos El Pastor (tacos-el-pastor)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Header Actions -->
+    <div class="flex items-center space-x-2">
+      <!-- Manual Sync Button -->
+      <button id="btn-refresh-sync" title="Sincronizar ahora con Supabase" class="flex items-center space-x-1.5 px-3 py-1 bg-slate-800 hover:bg-slate-700 active:bg-slate-600 border border-slate-700 rounded text-xs font-semibold text-slate-200 transition">
+        <svg id="sync-spinner-icon" class="w-3.5 h-3.5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+        </svg>
+        <span id="sync-button-text">Sync</span>
+      </button>
+
+      <!-- Settings Button -->
+      <button id="btn-open-settings" title="Configurar endpoints y llaves" class="p-1.5 bg-slate-800 hover:bg-slate-700 active:bg-slate-600 border border-slate-700 rounded text-slate-300 hover:text-white transition">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ========================================================================= -->
+  <!-- MAIN 3-COLUMN LAYOUT -->
+  <!-- ========================================================================= -->
+  <main class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-0 overflow-hidden">
+
+    <!-- ======================================================================= -->
+    <!-- PANEL 1: WHATSAPP MULTI-CLIENT SIMULATOR (LEFT COLUMN - 4 COLS) -->
+    <!-- ======================================================================= -->
+    <section id="panel-whatsapp-chat" class="lg:col-span-4 flex flex-col border-r border-slate-800 bg-slate-900 overflow-hidden">
+      <!-- Contact List Switcher Bar -->
+      <div class="bg-slate-950 p-2.5 border-b border-slate-800 shrink-0">
+        <div class="flex items-center justify-between mb-2">
+          <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+            <span>📱</span> Clientes Simulados
+          </div>
+          <button id="btn-add-contact" class="px-2 py-0.5 text-xs font-medium text-emerald-400 hover:text-emerald-300 bg-emerald-950/60 hover:bg-emerald-900/80 border border-emerald-700/50 rounded transition flex items-center gap-1">
+            <span>+</span> Nuevo Teléfono
+          </button>
+        </div>
+
+        <!-- Contact Pills Carousel / List -->
+        <div id="contact-list-container" class="flex gap-2 overflow-x-auto pb-1 scrollbar-thin">
+          <!-- Populated dynamically by chat-ui.js -->
+        </div>
+      </div>
+
+      <!-- Active Chat Header -->
+      <div class="h-14 bg-slate-850 bg-slate-800/80 px-4 flex items-center justify-between border-b border-slate-700/60 shrink-0">
+        <div class="flex items-center space-x-3 overflow-hidden">
+          <div id="chat-header-avatar" class="w-9 h-9 rounded-full bg-emerald-600 flex items-center justify-center text-base shrink-0 shadow">
+            👨‍💼
+          </div>
+          <div class="truncate">
+            <h2 id="chat-header-title" class="text-sm font-semibold text-white truncate">Carlos Mendoza</h2>
+            <p id="chat-header-phone" class="text-xs text-slate-400 font-mono">+52 1 55 1234 5678</p>
+          </div>
+        </div>
+        
+        <div class="flex items-center space-x-1.5">
+          <span id="chat-header-status" class="text-[11px] px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 cursor-pointer hover:bg-emerald-500/30 transition flex items-center gap-1 font-semibold select-none" title="Click para pausar el Bot y activar Modo Humano">
+            🤖 Modo IA
+          </span>
+          <button id="btn-copy-transcript" title="Copiar transcripción completa y tools al portapapeles" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/80 transition text-xs flex items-center gap-1 cursor-pointer">
+            <span id="btn-copy-transcript-icon">📋</span>
+            <span id="btn-copy-transcript-text" class="hidden sm:inline text-[11px] font-medium">Copiar Log</span>
+          </button>
+          <button id="btn-export-json" title="Descargar log estructurado en archivo JSON" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/80 transition text-xs flex items-center gap-1 cursor-pointer">
+            <span>💾</span>
+            <span class="hidden sm:inline text-[11px] font-medium">Exportar JSON</span>
+          </button>
+          <button id="btn-clear-chat-view" title="Limpiar vista de chat (local)" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-200 border border-slate-700/80 transition text-xs cursor-pointer">
+            🧹
+          </button>
+        </div>
+      </div>
+
+      <!-- Message History Viewport (WhatsApp Dark Style) -->
+      <div id="chat-messages-container" class="flex-1 p-4 overflow-y-auto wa-pattern-bg space-y-3">
+        <!-- Dynamic message bubbles rendered here -->
+      </div>
+
+      <!-- Typing Indicator -->
+      <div id="typing-indicator" class="hidden px-4 py-2 bg-slate-900/90 border-t border-slate-800 flex items-center space-x-2 text-xs text-slate-400">
+        <span class="text-slate-300 font-medium">Asistente IA está respondiendo</span>
+        <div class="flex space-x-1">
+          <div class="w-1.5 h-1.5 bg-emerald-400 rounded-full typing-dot"></div>
+          <div class="w-1.5 h-1.5 bg-emerald-400 rounded-full typing-dot"></div>
+          <div class="w-1.5 h-1.5 bg-emerald-400 rounded-full typing-dot"></div>
+        </div>
+      </div>
+
+      <!-- Quick Message Presets -->
+      <div class="px-3 py-1.5 bg-slate-950/80 border-t border-slate-800 flex gap-1.5 overflow-x-auto text-[11px] text-slate-300 shrink-0">
+        <button class="btn-quick-preset px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 whitespace-nowrap transition" data-text="¡Hola! ¿Qué pizzas tienen en el menú?">
+          🍕 Ver menú
+        </button>
+        <button class="btn-quick-preset px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 whitespace-nowrap transition" data-text="Quiero una pizza de Pepperoni grande y un refresco.">
+          🛒 Pedir Pepperoni
+        </button>
+        <button class="btn-quick-preset px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 whitespace-nowrap transition" data-text="Recuerda que no me gusta la cebolla en ninguna pizza.">
+          📝 Nota especial
+        </button>
+        <button class="btn-quick-preset px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 whitespace-nowrap transition" data-text="Mi dirección es Av. Reforma 123 y pagaré en efectivo. Confirma mi pedido.">
+          ✅ Confirmar pedido
+        </button>
+        <button class="btn-quick-preset px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 whitespace-nowrap transition" data-text="Quiero hablar con una persona por favor.">
+          👤 Hablar con humano
+        </button>
+      </div>
+
+      <!-- Chat Input Area -->
+      <div class="p-3 bg-slate-900 border-t border-slate-800 shrink-0">
+        <form id="chat-form" class="flex items-center space-x-2">
+          <textarea
+            id="chat-input"
+            rows="1"
+            placeholder="Escribe un mensaje como cliente de WhatsApp..."
+            class="flex-1 bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-emerald-500 resize-none max-h-24"
+          ></textarea>
+          <button
+            type="submit"
+            id="btn-send-message"
+            class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-semibold rounded-lg text-sm transition flex items-center justify-center shrink-0 shadow"
+          >
+            <span id="btn-send-text">Enviar</span>
+            <svg id="btn-send-spinner" class="hidden w-4 h-4 ml-1 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- ======================================================================= -->
+    <!-- PANEL 2: REAL-TIME KITCHEN & ORDERS DASHBOARD (CENTER COLUMN - 4 COLS) -->
+    <!-- ======================================================================= -->
+    <section id="panel-kitchen-orders" class="lg:col-span-4 flex flex-col border-r border-slate-800 bg-slate-900/60 overflow-hidden">
+      <!-- Section Header -->
+      <div class="h-14 bg-slate-900 border-b border-slate-800 px-4 flex items-center justify-between shrink-0">
+        <div class="flex items-center space-x-2">
+          <span class="text-lg">👨‍🍳</span>
+          <h2 class="text-sm font-bold text-white uppercase tracking-wider">Tablero de Cocina & Pedidos</h2>
+        </div>
+        <div id="order-status-badge" class="text-xs px-2.5 py-0.5 rounded-full font-semibold bg-slate-800 text-slate-400 border border-slate-700">
+          Sin orden activa
+        </div>
+      </div>
+
+      <!-- Scrollable Order Details Container -->
+      <div class="flex-1 p-4 overflow-y-auto space-y-4">
+        
+        <!-- Active Order Header Card -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-sm">
+          <div class="flex items-center justify-between mb-2">
+            <div>
+              <span class="text-xs text-slate-400">Orden ID</span>
+              <p id="order-id-label" class="text-xs font-mono font-bold text-slate-200 truncate">Ninguna</p>
+            </div>
+            <div class="text-right">
+              <span class="text-xs text-slate-400">Fecha/Hora</span>
+              <p id="order-created-time" class="text-xs text-slate-300">—</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Order Items Breakdown Table Card -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-sm">
+          <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center justify-between">
+            <span>🍕 Ítems en la Comanda</span>
+            <span id="order-items-count-badge" class="text-slate-400 font-mono font-normal">0 ítems</span>
+          </h3>
+
+          <div id="order-items-container" class="overflow-x-auto">
+            <!-- Empty state -->
+            <div id="order-empty-state" class="py-8 text-center text-slate-500 text-xs">
+              <p class="text-2xl mb-1">🛒</p>
+              El cliente no tiene un pedido abierto actualmente.
+            </div>
+
+            <!-- Items Table (shown when items exist) -->
+            <table id="order-items-table" class="w-full text-left text-xs hidden">
+              <thead>
+                <tr class="border-b border-slate-800 text-slate-400 font-medium pb-1">
+                  <th class="py-1.5">Cant.</th>
+                  <th class="py-1.5">Producto</th>
+                  <th class="py-1.5 text-right">P. Unit</th>
+                  <th class="py-1.5 text-right">Subtotal</th>
+                </tr>
+              </thead>
+              <tbody id="order-items-tbody" class="divide-y divide-slate-800/60 font-mono text-slate-300">
+                <!-- Rows injected dynamically by kitchen-ui.js -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Financial Summary Card (Deterministic calculation from DB) -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-sm space-y-2">
+          <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+            💰 Resumen Financiero (Backend Determinista)
+          </h3>
+          <div class="flex justify-between text-xs text-slate-400">
+            <span>Subtotal:</span>
+            <span id="order-subtotal" class="font-mono text-slate-200">$0.00</span>
+          </div>
+          <div class="flex justify-between text-xs text-slate-400">
+            <span>Envío a domicilio:</span>
+            <span id="order-delivery-fee" class="font-mono text-slate-200">$0.00</span>
+          </div>
+          <div class="flex justify-between text-xs text-slate-400">
+            <span>Descuentos:</span>
+            <span id="order-discount" class="font-mono text-emerald-400">-$0.00</span>
+          </div>
+          <div class="border-t border-slate-800 pt-2 flex justify-between text-sm font-bold text-white">
+            <span>Total a Pagar:</span>
+            <span id="order-total-amount" class="font-mono text-emerald-400 text-base">$0.00</span>
+          </div>
+        </div>
+
+        <!-- Delivery & Payment Metadata Card -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-sm space-y-2.5">
+          <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">
+            📍 Datos de Entrega y Pago
+          </h3>
+          <div>
+            <span class="text-[11px] text-slate-400">Dirección de Entrega:</span>
+            <p id="order-delivery-address" class="text-xs text-slate-200 font-medium mt-0.5 italic bg-slate-950 p-2 rounded border border-slate-800/80">
+              No especificada aún
+            </p>
+          </div>
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <div>
+              <span class="text-[11px] text-slate-400">Método de Pago:</span>
+              <p id="order-payment-method" class="font-semibold text-slate-200 uppercase mt-0.5">
+                —
+              </p>
+            </div>
+            <div>
+              <span class="text-[11px] text-slate-400">Estado de Pago:</span>
+              <p id="order-payment-status" class="font-semibold text-slate-200 uppercase mt-0.5">
+                —
+              </p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ======================================================================= -->
+    <!-- PANEL 3: LLM TOOLS INSPECTOR & CUSTOMER MEMORY (RIGHT COLUMN - 4 COLS) -->
+    <!-- ======================================================================= -->
+    <section id="panel-tools-inspector" class="lg:col-span-4 flex flex-col bg-slate-950 overflow-hidden">
+      <!-- Section Header -->
+      <div class="h-14 bg-slate-900 border-b border-slate-800 px-4 flex items-center justify-between shrink-0">
+        <div class="flex items-center space-x-2">
+          <span class="text-lg">🧠</span>
+          <h2 class="text-sm font-bold text-white uppercase tracking-wider">Memoria & Tools del LLM</h2>
+        </div>
+        
+        <!-- Conversation Mode Badge -->
+        <div id="conversation-mode-badge" class="text-xs px-2.5 py-0.5 rounded-full font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
+          <span>🤖</span> MODO IA
+        </div>
+      </div>
+
+      <!-- Scrollable Inspector Container -->
+      <div class="flex-1 p-4 overflow-y-auto space-y-4">
+        
+        <!-- Customer Memory Card ("Bloc de Notas del Mesero") -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-sm">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+              <span>📝</span> Bloc de Notas del Mesero (notes_md)
+            </h3>
+            <span id="customer-memory-phone" class="text-[11px] font-mono text-slate-400">—</span>
+          </div>
+
+          <div class="bg-slate-950 border border-slate-800 rounded-lg p-3 min-h-[90px] max-h-56 overflow-y-auto">
+            <div id="customer-notes-markdown" class="text-xs text-slate-300 markdown-content prose-invert">
+              <p class="text-slate-500 italic text-center py-4">Sin notas registradas para este cliente.</p>
+            </div>
+          </div>
+          <p class="text-[10px] text-slate-500 mt-1.5">
+            ℹ️ Actualizado en vivo mediante la tool <code class="text-sky-400 font-mono">update_customer_notes</code> del orquestador.
+          </p>
+        </div>
+
+        <!-- Chronological LLM Tool Execution Timeline -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-sm space-y-3">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+              <span>⚡</span> Registro de Tools Ejecutadas
+            </h3>
+            <span id="tools-count-badge" class="text-xs font-mono px-2 py-0.5 rounded bg-slate-800 text-sky-400 border border-slate-700">
+              0 llamadas
+            </span>
+          </div>
+
+          <div id="tools-timeline-container" class="space-y-2.5 max-h-[480px] overflow-y-auto pr-1">
+            <!-- Empty state -->
+            <div id="tools-empty-state" class="py-8 text-center text-slate-500 text-xs">
+              <p class="text-2xl mb-1">🔍</p>
+              Aún no se han ejecutado herramientas de IA en esta conversación.
+            </div>
+
+            <!-- Tool Execution Cards injected by debugger-ui.js -->
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========================================================================= -->
+  <!-- SETTINGS MODAL -->
+  <!-- ========================================================================= -->
+  <div id="settings-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+      <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between">
+        <h3 class="text-sm font-bold text-white flex items-center gap-2">
+          <span>⚙️</span> Configuración del Simulador (DEV_ONLY)
+        </h3>
+        <button id="btn-close-settings" class="text-slate-400 hover:text-white text-lg font-bold">&times;</button>
+      </div>
+
+      <form id="settings-form" class="p-6 space-y-4 text-xs">
+        <div>
+          <label class="block text-slate-400 font-semibold mb-1">URL del Webhook de Worker (Cloudflare)</label>
+          <input id="setting-worker-url" type="text" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 font-mono text-slate-200 focus:outline-none focus:border-emerald-500" />
+        </div>
+
+        <div>
+          <label class="block text-slate-400 font-semibold mb-1">API Key del Worker (Evolution Verify Token)</label>
+          <input id="setting-worker-key" type="password" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 font-mono text-slate-200 focus:outline-none focus:border-emerald-500" />
+        </div>
+
+        <div>
+          <label class="block text-slate-400 font-semibold mb-1">Supabase REST URL</label>
+          <input id="setting-supabase-url" type="text" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 font-mono text-slate-200 focus:outline-none focus:border-emerald-500" />
+        </div>
+
+        <div>
+          <label class="block text-slate-400 font-semibold mb-1">Supabase Service Role Key</label>
+          <input id="setting-supabase-key" type="password" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 font-mono text-slate-200 focus:outline-none focus:border-emerald-500" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-400 font-semibold mb-1">Slug de Restaurante</label>
+            <input id="setting-restaurant-slug" type="text" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 font-mono text-slate-200 focus:outline-none focus:border-emerald-500" />
+          </div>
+          <div>
+            <label class="block text-slate-400 font-semibold mb-1">Intervalo de Polling (ms)</label>
+            <input id="setting-poll-interval" type="number" min="1000" step="500" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 font-mono text-slate-200 focus:outline-none focus:border-emerald-500" />
+          </div>
+        </div>
+
+        <div class="pt-4 border-t border-slate-800 flex items-center justify-between">
+          <button type="button" id="btn-reset-settings" class="px-3 py-2 text-rose-400 hover:text-rose-300 font-medium transition">
+            Restablecer Valores por Defecto
+          </button>
+          <div class="flex space-x-2">
+            <button type="button" id="btn-cancel-settings" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-slate-300 font-semibold transition">
+              Cancelar
+            </button>
+            <button type="submit" id="btn-save-settings" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 rounded-lg text-white font-semibold transition">
+              Guardar Cambios
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- ADD CONTACT MODAL -->
+  <!-- ========================================================================= -->
+  <div id="add-contact-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+      <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between">
+        <h3 class="text-sm font-bold text-white flex items-center gap-2">
+          <span>📱</span> Agregar Nuevo Cliente Simulado
+        </h3>
+        <button id="btn-close-add-contact" class="text-slate-400 hover:text-white text-lg font-bold">&times;</button>
+      </div>
+
+      <form id="add-contact-form" class="p-6 space-y-4 text-xs">
+        <div>
+          <label class="block text-slate-400 font-semibold mb-1">Número de Teléfono (con código de país ej. 521...)</label>
+          <input id="modal-contact-phone" type="tel" required placeholder="5215500001122" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 font-mono text-slate-200 focus:outline-none focus:border-emerald-500" />
+        </div>
+
+        <div>
+          <label class="block text-slate-400 font-semibold mb-1">Nombre Completo del Cliente</label>
+          <input id="modal-contact-name" type="text" required placeholder="María González" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-slate-200 focus:outline-none focus:border-emerald-500" />
+        </div>
+
+        <div>
+          <label class="block text-slate-400 font-semibold mb-1">Avatar / Emoji</label>
+          <div class="flex items-center space-x-2">
+            <input id="modal-contact-avatar" type="text" value="🍕" maxlength="4" class="w-16 text-center bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-base focus:outline-none focus:border-emerald-500" />
+            <span class="text-slate-500 text-[11px]">Emoji representativo para el avatar.</span>
+          </div>
+        </div>
+
+        <div class="pt-4 border-t border-slate-800 flex items-center justify-end space-x-2">
+          <button type="button" id="btn-cancel-add-contact" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-slate-300 font-semibold transition">
+            Cancelar
+          </button>
+          <button type="submit" id="btn-submit-add-contact" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 rounded-lg text-white font-semibold transition">
+            Agregar y Seleccionar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 max-w-sm pointer-events-none"></div>
+
+  <!-- Entry Script for ES6 Modules -->
+  <script type="module" src="./config.js"></script>
+  <script type="module" src="./js/store.js"></script>
+  <script type="module" src="./js/api.js"></script>
+  <script type="module" src="./js/chat-ui.js"></script>
+  <script type="module" src="./js/kitchen-ui.js"></script>
+  <script type="module" src="./js/debugger-ui.js"></script>
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>

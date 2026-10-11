@@ -1,0 +1,35 @@
+{
+  "name": "chataliado-worker",
+  "version": "0.0.1",
+  "private": true,
+  "description": "ChatAliado — Cloudflare Worker backend & AI agent orchestrator",
+  "scripts": {
+    "dev": "wrangler dev",
+    "playground": "node ../playground/serve.js",
+    "deploy": "wrangler deploy",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src/"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.112.3",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.8.0",
+    "@cloudflare/workers-types": "^5.20260815.0",
+    "typescript": "^5.8.0",
+    "vitest": "~3.1.0",
+    "wrangler": "^4.14.0"
+  },
+  "allowScripts": {
+    "workerd@1.20250906.0": true,
+    "workerd@1.20260815.1": true,
+    "esbuild@0.25.4": true,
+    "esbuild@0.25.12": true,
+    "esbuild@0.28.1": true,
+    "sharp@0.33.5": true,
+    "sharp@0.35.2": true
+  }
+}

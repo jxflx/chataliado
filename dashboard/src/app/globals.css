@@ -1,0 +1,375 @@
+@import "tailwindcss";
+
+/* ==========================================================================
+   CHATALIADO LIQUID GLASS DESIGN SYSTEM (Dieter Rams / Apple HIG Standard)
+   ========================================================================== */
+
+:root {
+  /* Lienzo y Superficies Estructurales (Editorial Paper Canvas #FAF8F5) */
+  --color-canvas-bg: #FAF8F5;
+  --color-surface-subtle: #F8FAFC;
+  --color-surface-elevated: #FFFFFF;
+  --color-border-whisper: rgba(226, 232, 240, 0.8);
+  --color-border-strong: #CBD5E1;
+
+  /* Tinta Tipográfica de Alto Contraste (WCAG AAA - Sin Negro Puro #000000) */
+  --color-ink-primary: #0F172A;       /* Slate-900: High-contrast ink per DESIGN.md */
+  --color-ink-secondary: #475569;     /* Slate-600: Metadatos, timestamps */
+  --color-ink-tertiary: #94A3B8;      /* Slate-400: Placeholders, iconos inactivos */
+
+  /* Identidad Primaria & Orquestación IA (< 80% Saturación) */
+  --color-accent-jade: #21B186;       /* CTA primario, Modo IA Activo */
+  --color-accent-jade-hover: #1B9471; /* Hover primario */
+  --color-accent-jade-subtle: #E8F7F2;/* Fondo sutil para badges IA */
+
+  /* Tintes Ergonómicos Secundarios (Inspiración Trek) */
+  --color-periwinkle-tint: #DDEEFF;   /* Burbuja WhatsApp cliente, fila activa */
+  --color-periwinkle-ink: #1E3A8A;    /* Tinta de alto contraste sobre periwinkle */
+
+  /* Alertas Operativas y Estados de Cocina / Handoff */
+  --color-alert-ochre: #E7B454;       /* Demora cocina >15m, Handoff pendiente */
+  --color-alert-ochre-subtle: #FEF7E6;/* Fondo sutil de alerta handoff */
+  --color-alert-crimson: #EF4444;     /* Demora crítica >25m, orden cancelada */
+  --color-alert-crimson-subtle: #FEE2E2;/* Fondo sutil para alertas críticas */
+
+  /* Mapeo de compatibilidad con variables base */
+  --background: var(--color-canvas-bg);
+  --foreground: var(--color-ink-primary);
+}
+
+/* Mapeo de Tokens a Clases de Utilidad Nativas de Tailwind CSS v4 */
+@theme inline {
+  --font-sans: var(--font-plus-jakarta), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), monospace;
+
+  /* Compatibilidad base */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  /* Colores de Superficie */
+  --color-canvas-bg: var(--color-canvas-bg);
+  --color-canvas: var(--color-canvas-bg);
+  --color-surface-subtle: var(--color-surface-subtle);
+  --color-surface-elevated: var(--color-surface-elevated);
+  --color-border-whisper: var(--color-border-whisper);
+  --color-border-strong: var(--color-border-strong);
+  --color-whisper: var(--color-border-whisper);
+
+  /* Colores de Tinta */
+  --color-ink-primary: var(--color-ink-primary);
+  --color-ink-secondary: var(--color-ink-secondary);
+  --color-ink-tertiary: var(--color-ink-tertiary);
+  --color-slate-text: var(--color-ink-primary);
+
+  /* Jade */
+  --color-accent-jade: var(--color-accent-jade);
+  --color-accent-jade-hover: var(--color-accent-jade-hover);
+  --color-accent-jade-subtle: var(--color-accent-jade-subtle);
+  --color-jade: var(--color-accent-jade);
+  --color-jade-hover: var(--color-accent-jade-hover);
+  --color-jade-subtle: var(--color-accent-jade-subtle);
+
+  /* Periwinkle */
+  --color-periwinkle-tint: var(--color-periwinkle-tint);
+  --color-periwinkle-ink: var(--color-periwinkle-ink);
+  --color-periwinkle: var(--color-periwinkle-tint);
+
+  /* Alertas */
+  --color-alert-ochre: var(--color-alert-ochre);
+  --color-alert-ochre-subtle: var(--color-alert-ochre-subtle);
+  --color-ochre: var(--color-alert-ochre);
+  --color-ochre-subtle: var(--color-alert-ochre-subtle);
+  --color-alert-crimson: var(--color-alert-crimson);
+  --color-alert-crimson-subtle: var(--color-alert-crimson-subtle);
+  --color-crimson: var(--color-alert-crimson);
+  --color-crimson-subtle: var(--color-alert-crimson-subtle);
+
+  /* Sombras y Relieves Especulares Liquid Glass */
+  --shadow-2xs: 0 1px 2px 0 rgba(15, 23, 42, 0.04);
+  --shadow-glass-subtle: 0 10px 30px -5px rgba(15, 23, 42, 0.05), inset 0 1px 1px rgba(255, 255, 255, 0.9);
+  --shadow-glass-elevated: 0 20px 40px -15px rgba(15, 23, 42, 0.08), inset 0 1px 1px rgba(255, 255, 255, 0.95);
+  --shadow-inner-specular: inset 0 1px 1px 0 rgba(255, 255, 255, 0.95);
+  --shadow-inner-bevel: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+
+  /* Curva de Física de Presión */
+  --ease-fluid: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+/* ==========================================================================
+   ESTILOS BASE & REGLAS GLOBALES DE DISCIPLINA
+   ========================================================================== */
+
+body {
+  background-color: var(--color-canvas-bg);
+  color: var(--color-ink-primary);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Regla Universal de Iconografía: Grosor uniforme de 1.5px para Lucide */
+svg.lucide {
+  stroke-width: 1.5px;
+}
+
+/* Barras de Desplazamiento Minimalistas */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+/* ==========================================================================
+   RUIDO / TEXTURA EDITORIAL TACTIL (Analog Stipple Film Grain)
+   ========================================================================== */
+.grain-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 35;
+  opacity: 0.36;
+  mix-blend-mode: overlay;
+  background-repeat: repeat;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.45'/%3E%3C/svg%3E");
+}
+
+/* ==========================================================================
+   PARED DE COLOR CONTINUA (Full-Bleed Chromatic Wall)
+   Inspirada en Monograph + Tacto Editorial Richard Sancho
+   ========================================================================== */
+.wall-cloud {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(90px);
+  -webkit-filter: blur(90px);
+  mix-blend-mode: multiply;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  contain: paint;
+}
+
+
+@keyframes wallDriftA {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
+  }
+  33% {
+    transform: translate3d(4vw, -3vh, 0) scale(1.08) rotate(5deg);
+  }
+  66% {
+    transform: translate3d(-3vw, 4vh, 0) scale(0.95) rotate(-4deg);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
+  }
+}
+
+@keyframes wallDriftB {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
+  }
+  33% {
+    transform: translate3d(-5vw, 4vh, 0) scale(1.10) rotate(-6deg);
+  }
+  66% {
+    transform: translate3d(4vw, -2vh, 0) scale(0.92) rotate(5deg);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
+  }
+}
+
+@keyframes wallDriftC {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(3vw, 3vh, 0) scale(1.12);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+.wall-drift-a {
+  animation: wallDriftA 22s ease-in-out infinite;
+}
+
+.wall-drift-b {
+  animation: wallDriftB 26s ease-in-out infinite;
+}
+
+.wall-drift-c {
+  animation: wallDriftC 19s ease-in-out infinite;
+}
+
+#ambient-mesh-canvas {
+  contain: strict;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wall-drift-a,
+  .wall-drift-b,
+  .wall-drift-c {
+    animation: none;
+  }
+}
+
+/* ==========================================================================
+   AMBIENT DYNAMIC GRADIENT MESH & SPECULAR SHEEN
+   ========================================================================== */
+.ambient-layer {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transform: scale(0.92) translateZ(0);
+  pointer-events: none;
+  will-change: opacity, transform, filter;
+  transition: opacity 700ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ambient-layer.active {
+  opacity: 1;
+  transform: scale(1) translateZ(0);
+}
+
+.ambient-layer.entering {
+  animation: layerEntrance 1100ms cubic-bezier(0.19, 1, 0.22, 1) forwards;
+}
+
+@keyframes layerEntrance {
+  0% {
+    opacity: 0;
+    transform: scale(0.88) rotate(-1.5deg);
+    filter: saturate(105%) blur(20px);
+  }
+  50% {
+    opacity: 0.98;
+    transform: scale(1.02) rotate(0.6deg);
+    filter: saturate(125%) blur(0px);
+  }
+  80% {
+    transform: scale(0.995) rotate(-0.2deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+    filter: saturate(110%) blur(0px);
+  }
+}
+
+.ambient-sheen {
+  position: absolute;
+  inset: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(115deg, transparent 40%, rgba(255, 255, 255, 0.45) 50%, transparent 60%);
+  pointer-events: none;
+  opacity: 0;
+  z-index: 5;
+}
+
+.ambient-sheen.entering {
+  animation: specularSweep 1000ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes specularSweep {
+  0% {
+    transform: translateX(-60%) translateY(-30%) rotate(15deg);
+    opacity: 0;
+  }
+  30% {
+    opacity: 0.7;
+  }
+  100% {
+    transform: translateX(60%) translateY(30%) rotate(15deg);
+    opacity: 0;
+  }
+}
+
+/* ==========================================================================
+   UTILIDADES LIQUID GLASS & MICRO-INTERACCIONES
+   ========================================================================== */
+
+@layer utilities {
+  /* Dock / Barra de Acciones Flotante */
+  .liquid-dock {
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    box-shadow: 0 12px 32px -4px rgba(15, 23, 42, 0.06), inset 0 1px 1px rgba(255, 255, 255, 0.95);
+  }
+
+  /* Cabeceras de Sección y Ventana */
+  .liquid-header {
+    background: rgba(255, 255, 255, 0.78);
+    backdrop-filter: blur(20px) saturate(170%);
+    -webkit-backdrop-filter: blur(20px) saturate(170%);
+    border: 1px solid rgba(255, 255, 255, 0.92);
+    box-shadow: 0 6px 24px -2px rgba(15, 23, 42, 0.03), inset 0 1px 1px rgba(255, 255, 255, 0.9);
+  }
+
+  /* Tarjetas de Chat, Comandas y Modales con Micro-Relieve */
+  .liquid-card {
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(20px) saturate(170%);
+    -webkit-backdrop-filter: blur(20px) saturate(170%);
+    border: 1px solid rgba(255, 255, 255, 0.95);
+    box-shadow: 0 8px 24px -4px rgba(15, 23, 42, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    transition: all 180ms ease-out;
+  }
+
+  .liquid-card.bumped {
+    transform: scale(0.92) translateY(8px);
+    opacity: 0;
+  }
+
+  /* Renglones de Platillos Tachables en KDS */
+  .item-row {
+    transition: background-color 100ms ease, opacity 100ms ease;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .item-row.item-done {
+    opacity: 0.35;
+    text-decoration: line-through;
+  }
+
+  .item-row.item-done .item-check {
+    background-color: #21B186;
+    border-color: #21B186;
+    color: white;
+  }
+
+  /* Contenedores y Paneles Multisección */
+  .liquid-panel {
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.05), inset 0 1px 1px rgba(255, 255, 255, 0.95);
+  }
+
+  /* Micro-Interacción de Compresión Táctil (Física de Presión Hardware) */
+  .pressable {
+    transition: transform 80ms cubic-bezier(0.32, 0.72, 0, 1), background-color 150ms ease, box-shadow 150ms ease;
+  }
+  .pressable:active {
+    transform: scale(0.98) translateY(1px);
+  }
+}

@@ -1,0 +1,1839 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-[#FAF8F5]">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChatAliado — Dashboard & KDS Liquid Glass Edition</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono (Tipografía no-IA, editorial y humana) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', '-apple-system', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            canvas: '#F8FAFC',
+            ink: {
+              primary: '#0F172A',
+              secondary: '#475569',
+              tertiary: '#94A3B8',
+            },
+            jade: {
+              DEFAULT: '#21B186',
+              hover: '#1B9471',
+              subtle: 'rgba(33, 177, 134, 0.12)',
+            },
+            periwinkle: {
+              tint: 'rgba(221, 238, 255, 0.75)',
+              ink: '#1E3A8A',
+            },
+            ochre: {
+              DEFAULT: '#E7B454',
+              subtle: 'rgba(231, 180, 84, 0.14)',
+            },
+            crimson: {
+              DEFAULT: '#EF4444',
+              subtle: 'rgba(239, 68, 68, 0.12)',
+            },
+            whisper: 'rgba(226, 232, 240, 0.7)',
+          },
+          boxShadow: {
+            'glass-subtle': '0 10px 30px -5px rgba(15, 23, 42, 0.05), inset 0 1px 1px rgba(255, 255, 255, 0.9)',
+            'glass-elevated': '0 20px 40px -15px rgba(15, 23, 42, 0.08), inset 0 1px 1px rgba(255, 255, 255, 0.95)',
+            'inner-specular': 'inset 0 1px 1px 0 rgba(255, 255, 255, 0.95)',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: #0F172A;
+      background: #FAF8F5;
+      -webkit-font-smoothing: antialiased;
+    }
+    /* ========================================================= */
+    /* AMBIENT DYNAMIC GRADIENT MESH (Liquid Glass Living Canvas)*/
+    /* ========================================================= */
+    .ambient-layer {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transform: scale(0.92) translateZ(0);
+      pointer-events: none;
+      will-change: opacity, transform, filter;
+      transition: opacity 700ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .ambient-layer.active {
+      opacity: 1;
+      transform: scale(1) translateZ(0);
+    }
+    .ambient-layer.entering {
+      animation: layerEntrance 1100ms cubic-bezier(0.19, 1, 0.22, 1) forwards;
+    }
+    @keyframes layerEntrance {
+      0% {
+        opacity: 0;
+        transform: scale(0.88) rotate(-1.5deg);
+        filter: saturate(105%) blur(20px);
+      }
+      50% {
+        opacity: 0.98;
+        transform: scale(1.02) rotate(0.6deg);
+        filter: saturate(125%) blur(0px);
+      }
+      80% {
+        transform: scale(0.995) rotate(-0.2deg);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+        filter: saturate(110%) blur(0px);
+      }
+    }
+
+    /* Brillo de barrido especular sobre el vidrio al cambiar de pestaña */
+    .ambient-sheen {
+      position: absolute;
+      inset: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(115deg, transparent 40%, rgba(255, 255, 255, 0.45) 50%, transparent 60%);
+      pointer-events: none;
+      opacity: 0;
+      z-index: 5;
+    }
+    .ambient-sheen.entering {
+      animation: specularSweep 1000ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes specularSweep {
+      0% {
+        transform: translateX(-60%) translateY(-30%) rotate(15deg);
+        opacity: 0;
+      }
+      30% {
+        opacity: 0.7;
+      }
+      100% {
+        transform: translateX(60%) translateY(30%) rotate(15deg);
+        opacity: 0;
+      }
+    }
+
+    /* ========================================================= */
+    /* PARED DE COLOR CONTINUA (Full-Bleed Chromatic Wall)       */
+    /* Inspirada en Monograph + Tacto Editorial Richard Sancho   */
+    /* ========================================================= */
+    .wall-cloud {
+      position: absolute;
+      border-radius: 9999px;
+      filter: blur(90px);
+      -webkit-filter: blur(90px);
+      mix-blend-mode: multiply;
+      will-change: transform;
+      transform: translate3d(0, 0, 0);
+    }
+    @keyframes wallDriftA {
+      0% {
+        transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
+      }
+      33% {
+        transform: translate3d(4vw, -3vh, 0) scale(1.08) rotate(5deg);
+      }
+      66% {
+        transform: translate3d(-3vw, 4vh, 0) scale(0.95) rotate(-4deg);
+      }
+      100% {
+        transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
+      }
+    }
+    @keyframes wallDriftB {
+      0% {
+        transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
+      }
+      33% {
+        transform: translate3d(-5vw, 4vh, 0) scale(1.10) rotate(-6deg);
+      }
+      66% {
+        transform: translate3d(4vw, -2vh, 0) scale(0.92) rotate(5deg);
+      }
+      100% {
+        transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
+      }
+    }
+    @keyframes wallDriftC {
+      0% {
+        transform: translate3d(0, 0, 0) scale(1);
+      }
+      50% {
+        transform: translate3d(3vw, 3vh, 0) scale(1.12);
+      }
+      100% {
+        transform: translate3d(0, 0, 0) scale(1);
+      }
+    }
+    .wall-drift-a {
+      animation: wallDriftA 22s ease-in-out infinite;
+    }
+    .wall-drift-b {
+      animation: wallDriftB 26s ease-in-out infinite;
+    }
+    .wall-drift-c {
+      animation: wallDriftC 19s ease-in-out infinite;
+    }
+
+    /* RUIDO / TEXTURA EDITORIAL TÁCTIL (Analog Stipple Film Grain) */
+    .grain-overlay {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 35;
+      opacity: 0.36;
+      mix-blend-mode: overlay;
+      background-repeat: repeat;
+    }
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .pressable {
+      transition: transform 80ms cubic-bezier(0.32, 0.72, 0, 1), background-color 150ms ease, box-shadow 150ms ease;
+    }
+    .pressable:active {
+      transform: scale(0.98) translateY(1px);
+    }
+    /* Clases Fundamentales de Liquid Glass */
+    .liquid-dock {
+      background: rgba(255, 255, 255, 0.72);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      box-shadow: 0 12px 32px -4px rgba(15, 23, 42, 0.06), inset 0 1px 1px rgba(255, 255, 255, 0.95);
+    }
+    .liquid-header {
+      background: rgba(255, 255, 255, 0.78);
+      backdrop-filter: blur(20px) saturate(170%);
+      -webkit-backdrop-filter: blur(20px) saturate(170%);
+      border: 1px solid rgba(255, 255, 255, 0.92);
+      box-shadow: 0 6px 24px -2px rgba(15, 23, 42, 0.03), inset 0 1px 1px rgba(255, 255, 255, 0.9);
+    }
+    .liquid-card {
+      background: rgba(255, 255, 255, 0.82);
+      backdrop-filter: blur(20px) saturate(170%);
+      -webkit-backdrop-filter: blur(20px) saturate(170%);
+      border: 1px solid rgba(255, 255, 255, 0.92);
+      box-shadow: 0 8px 24px -4px rgba(15, 23, 42, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.85);
+      transition: all 180ms ease-out;
+    }
+    .liquid-card.bumped {
+      transform: scale(0.92) translateY(8px);
+      opacity: 0;
+    }
+    .liquid-panel {
+      background: rgba(255, 255, 255, 0.55);
+      backdrop-filter: blur(20px) saturate(160%);
+      -webkit-backdrop-filter: blur(20px) saturate(160%);
+      border: 1px solid rgba(255, 255, 255, 0.85);
+      box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.05), inset 0 1px 1px rgba(255, 255, 255, 0.95);
+    }
+    .item-row {
+      transition: background-color 100ms ease, opacity 100ms ease;
+      cursor: pointer;
+      user-select: none;
+    }
+    .item-row.item-done {
+      opacity: 0.35;
+      text-decoration: line-through;
+    }
+    .item-row.item-done .item-check {
+      background-color: #21B186;
+      border-color: #21B186;
+      color: white;
+    }
+    .modal-backdrop {
+      background: rgba(15, 23, 42, 0.38);
+      backdrop-filter: blur(8px);
+    }
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(203, 213, 225, 0.8);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(148, 163, 184, 0.9);
+    }
+  </style>
+</head>
+<body class="h-full flex p-3 gap-3 overflow-hidden selection:bg-jade-subtle selection:text-jade">
+
+  <!-- ========================================================= -->
+  <!-- RUIDO / TEXTURA EDITORIAL TÁCTIL (Analog Stipple Film Grain)-->
+  <!-- ========================================================= -->
+  <div id="grain-overlay" class="grain-overlay" aria-hidden="true"></div>
+
+  <!-- ========================================================= -->
+  <!-- PARED DE COLOR CONTINUA Y AMBIENTAL (Chromatic Canvas)    -->
+  <!-- Inspirada en Monograph + Richard Sancho (Editorial)       -->
+  <!-- ========================================================= -->
+  <div id="ambient-mesh-canvas" class="fixed inset-0 pointer-events-none z-0 overflow-hidden select-none" aria-hidden="true">
+    <!-- Sheen de barrido especular sobre el vidrio al cambiar de pestaña -->
+    <div id="ambient-sheen" class="ambient-sheen"></div>
+
+    <!-- 1. Layer KDS (Composición Richard Sancho Suavizada: Terracota Editorial + Salvia Botánica + Periwinkle Glaciar) -->
+    <div id="ambient-layer-kds" class="ambient-layer active entering" style="background: linear-gradient(135deg, #FAF7F2 0%, #F6EFE8 30%, #EEF4F1 70%, #EBF2F7 100%);">
+      <!-- Nube Terracota Suave (Richard Sancho Clay Crust) -->
+      <div class="wall-cloud wall-drift-a -top-[25vw] -left-[20vw] w-[88vw] h-[88vw]" style="background: radial-gradient(circle, rgba(224, 109, 83, 0.42) 0%, rgba(235, 135, 105, 0.26) 35%, rgba(245, 165, 135, 0.12) 60%, transparent 78%);"></div>
+      <!-- Nube Jade Botánico Salvia Suave (Richard Sancho Botanical Jade/Moss) -->
+      <div class="wall-cloud wall-drift-b -bottom-[25vw] -right-[20vw] w-[92vw] h-[92vw]" style="background: radial-gradient(circle, rgba(46, 148, 114, 0.38) 0%, rgba(65, 175, 138, 0.24) 38%, rgba(95, 195, 160, 0.10) 62%, transparent 80%);"></div>
+      <!-- Nube Glaciar Periwinkle Azul Sutil (Richard Sancho Glaciar Periwinkle) -->
+      <div class="wall-cloud wall-drift-c -top-[15vw] right-[5vw] w-[75vw] h-[75vw]" style="background: radial-gradient(circle, rgba(74, 158, 220, 0.32) 0%, rgba(100, 180, 238, 0.20) 40%, rgba(140, 205, 245, 0.08) 60%, transparent 75%);"></div>
+      <!-- Nube Mostaza Oliva Terrosa Suave (Richard Sancho Earth Honey) -->
+      <div class="wall-cloud wall-drift-a bottom-[5vw] left-[15vw] w-[72vw] h-[72vw]" style="background: radial-gradient(circle, rgba(212, 163, 89, 0.28) 0%, rgba(230, 185, 115, 0.16) 42%, transparent 75%);"></div>
+    </div>
+
+    <!-- 2. Layer CHATS (WhatsApp Cockpit: Jade Esmeralda + Iris Violeta + Turquesa Eléctrico - Intacto Benchmark) -->
+    <div id="ambient-layer-chats" class="ambient-layer" style="background: linear-gradient(135deg, #ECFDF5 0%, #E6FFFA 35%, #EEF2FF 70%, #F0FDF4 100%);">
+      <!-- Nube Jade WhatsApp Esmeralda Profundo -->
+      <div class="wall-cloud wall-drift-b -top-[20vw] -right-[15vw] w-[88vw] h-[88vw]" style="background: radial-gradient(circle, rgba(16, 185, 129, 0.75) 0%, rgba(5, 150, 105, 0.50) 38%, rgba(52, 211, 153, 0.22) 62%, transparent 78%);"></div>
+      <!-- Nube Iris Violeta / Índigo Eléctrico -->
+      <div class="wall-cloud wall-drift-a -bottom-[25vw] -left-[20vw] w-[92vw] h-[92vw]" style="background: radial-gradient(circle, rgba(99, 102, 241, 0.70) 0%, rgba(129, 140, 248, 0.45) 40%, rgba(165, 180, 252, 0.20) 65%, transparent 80%);"></div>
+      <!-- Nube Cian Eléctrico Turquesa -->
+      <div class="wall-cloud wall-drift-c top-[10vw] left-[20vw] w-[75vw] h-[75vw]" style="background: radial-gradient(circle, rgba(6, 182, 212, 0.60) 0%, rgba(45, 212, 191, 0.35) 45%, transparent 75%);"></div>
+      <!-- Nube Menta Primaveral Suave -->
+      <div class="wall-cloud wall-drift-b bottom-[10vw] right-[25vw] w-[70vw] h-[70vw]" style="background: radial-gradient(circle, rgba(52, 211, 153, 0.50) 0%, rgba(110, 231, 183, 0.25) 45%, transparent 75%);"></div>
+    </div>
+
+    <!-- 3. Layer CLIENTES (Composición Monograph Suave y Etérea: Rosa Pastel + Lila Aire + Zafiro Calmo) -->
+    <div id="ambient-layer-customers" class="ambient-layer" style="background: linear-gradient(120deg, #FDF4F8 0%, #FAF6FE 40%, #F1F6FD 100%);">
+      <!-- Nube Berry Rose / Magenta Carmesí Sutil (Monograph Left Field) -->
+      <div class="wall-cloud wall-drift-a -top-[20vw] -left-[25vw] w-[95vw] h-[95vw]" style="background: radial-gradient(circle, rgba(225, 29, 114, 0.34) 0%, rgba(244, 63, 94, 0.22) 36%, rgba(251, 113, 133, 0.10) 62%, transparent 80%);"></div>
+      <!-- Nube Zafiro Royal Azure Calma (Monograph Right Field) -->
+      <div class="wall-cloud wall-drift-b -bottom-[20vw] -right-[20vw] w-[95vw] h-[95vw]" style="background: radial-gradient(circle, rgba(37, 99, 235, 0.32) 0%, rgba(59, 130, 246, 0.20) 38%, rgba(96, 165, 250, 0.08) 65%, transparent 80%);"></div>
+      <!-- Nube Orquídea Lavanda / Lila Aire (Monograph Center Bridge) -->
+      <div class="wall-cloud wall-drift-c top-[15vw] left-[25vw] w-[80vw] h-[80vw]" style="background: radial-gradient(circle, rgba(168, 85, 247, 0.28) 0%, rgba(192, 132, 252, 0.18) 42%, rgba(216, 180, 254, 0.08) 65%, transparent 76%);"></div>
+      <!-- Nube Rosa Fucsia Base Tenue -->
+      <div class="wall-cloud wall-drift-a bottom-[5vw] left-[15vw] w-[70vw] h-[70vw]" style="background: radial-gradient(circle, rgba(219, 39, 119, 0.22) 0%, rgba(236, 72, 153, 0.12) 45%, transparent 75%);"></div>
+    </div>
+
+    <!-- 4. Layer MENU (Catálogo Gourmet Toscano Suave: Miel Ámbar Cálido + Mandarina Pastel + Albahaca Ligera) -->
+    <div id="ambient-layer-menu" class="ambient-layer" style="background: linear-gradient(130deg, #FFFDF5 0%, #FEF9EC 35%, #F4FBF6 70%, #FFF5F6 100%);">
+      <!-- Nube Miel Ámbar Toscano Suave -->
+      <div class="wall-cloud wall-drift-a -top-[25vw] left-[10vw] w-[90vw] h-[90vw]" style="background: radial-gradient(circle, rgba(245, 158, 11, 0.35) 0%, rgba(251, 191, 36, 0.22) 38%, rgba(252, 211, 77, 0.09) 65%, transparent 80%);"></div>
+      <!-- Nube Atardecer Mandarina Coral Calma -->
+      <div class="wall-cloud wall-drift-b -bottom-[25vw] -right-[15vw] w-[92vw] h-[92vw]" style="background: radial-gradient(circle, rgba(249, 115, 22, 0.32) 0%, rgba(251, 146, 60, 0.20) 40%, rgba(253, 186, 116, 0.08) 65%, transparent 80%);"></div>
+      <!-- Nube Albahaca Menta Fresca Ligera -->
+      <div class="wall-cloud wall-drift-c -bottom-[15vw] -left-[15vw] w-[80vw] h-[80vw]" style="background: radial-gradient(circle, rgba(16, 185, 129, 0.28) 0%, rgba(52, 211, 153, 0.16) 42%, transparent 75%);"></div>
+      <!-- Nube Frutos Rojos Carmesí Frambuesa Suave -->
+      <div class="wall-cloud wall-drift-a top-[20vw] right-[20vw] w-[68vw] h-[68vw]" style="background: radial-gradient(circle, rgba(244, 63, 94, 0.22) 0%, rgba(251, 113, 133, 0.12) 45%, transparent 75%);"></div>
+    </div>
+
+    <!-- 5. Layer AJUSTES (Sistemas de Precisión Serenos: Cyber Índigo Sutil + Glaciar Calmo + Menta Aire) -->
+    <div id="ambient-layer-settings" class="ambient-layer" style="background: linear-gradient(135deg, #F4F6FD 0%, #EDF1FD 35%, #F3FAF8 70%, #F8FAFC 100%);">
+      <!-- Nube Cyber Índigo Suave -->
+      <div class="wall-cloud wall-drift-b -top-[25vw] -right-[20vw] w-[92vw] h-[92vw]" style="background: radial-gradient(circle, rgba(79, 70, 229, 0.32) 0%, rgba(99, 102, 241, 0.20) 38%, rgba(129, 140, 248, 0.09) 65%, transparent 80%);"></div>
+      <!-- Nube Océano Glaciar Cyan Aire -->
+      <div class="wall-cloud wall-drift-a -bottom-[25vw] -left-[20vw] w-[95vw] h-[95vw]" style="background: radial-gradient(circle, rgba(2, 132, 199, 0.30) 0%, rgba(14, 165, 233, 0.18) 40%, rgba(56, 189, 248, 0.08) 65%, transparent 80%);"></div>
+      <!-- Nube Menta Neón Ligera -->
+      <div class="wall-cloud wall-drift-c top-[10vw] left-[15vw] w-[80vw] h-[80vw]" style="background: radial-gradient(circle, rgba(20, 184, 166, 0.25) 0%, rgba(45, 212, 191, 0.14) 45%, transparent 75%);"></div>
+      <!-- Nube Pizarra Periwinkle Sutil -->
+      <div class="wall-cloud wall-drift-b bottom-[15vw] right-[25vw] w-[70vw] h-[70vw]" style="background: radial-gradient(circle, rgba(148, 163, 184, 0.20) 0%, rgba(203, 213, 225, 0.10) 45%, transparent 75%);"></div>
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- 1. DOCK FLOTANTE DE VIDRIO (SLIM LIQUID RAIL - 72px)       -->
+  <!-- ========================================================= -->
+  <aside class="w-[72px] liquid-dock rounded-3xl flex flex-col items-center justify-between py-4 shrink-0 select-none z-20">
+    <!-- Logo Monograma Monocromático -->
+    <div class="flex flex-col items-center gap-6">
+      <div class="w-11 h-11 rounded-2xl bg-gradient-to-b from-slate-900 to-slate-800 text-white flex items-center justify-center font-extrabold text-sm tracking-tighter shadow-md border border-white/20" title="ChatAliado Liquid Glass">
+        CA
+      </div>
+
+      <!-- Iconos de Navegación Vertical -->
+      <nav class="flex flex-col items-center gap-2">
+        <!-- 1. KDS (Activo) -->
+        <button id="nav-kds" onclick="switchMainTab('kds')" class="w-12 h-12 rounded-2xl bg-periwinkle-tint text-periwinkle-ink flex flex-col items-center justify-center gap-1 pressable relative shadow-2xs border border-white/90" title="Comandas de Cocina (KDS)">
+          <i data-lucide="chef-hat" class="w-5 h-5"></i>
+          <span class="text-[9px] font-bold tracking-tight">KDS</span>
+          <span id="rail-badge-count" class="absolute -top-1 -right-1 font-mono text-[10px] font-bold w-4 h-4 rounded-full bg-crimson text-white flex items-center justify-center border-2 border-white shadow-2xs">8</span>
+        </button>
+
+        <!-- 2. Chats WhatsApp -->
+        <button id="nav-chats" onclick="switchMainTab('chats')" class="w-12 h-12 rounded-2xl text-ink-secondary hover:text-ink-primary hover:bg-white/80 border border-transparent hover:border-white/60 flex flex-col items-center justify-center gap-1 pressable group relative" title="Monitor de Chats de WhatsApp">
+          <i data-lucide="message-square" class="w-5 h-5"></i>
+          <span class="text-[9px] font-bold tracking-tight">Chats</span>
+          <span class="absolute -top-1 -right-1 font-mono text-[10px] font-bold w-4 h-4 rounded-full bg-ochre text-white flex items-center justify-center border-2 border-white shadow-2xs" title="1 requiere atención">1</span>
+        </button>
+
+        <!-- 3. Clientes & Memoria -->
+        <button id="nav-customers" onclick="switchMainTab('customers')" class="w-12 h-12 rounded-2xl text-ink-secondary hover:text-ink-primary hover:bg-white/80 border border-transparent hover:border-white/60 flex flex-col items-center justify-center gap-1 pressable group" title="Clientes & Memoria">
+          <i data-lucide="users" class="w-5 h-5"></i>
+          <span class="text-[9px] font-bold tracking-tight">Clientes</span>
+        </button>
+
+        <!-- 4. Menú & Catálogo -->
+        <button id="nav-menu" onclick="switchMainTab('menu')" class="w-12 h-12 rounded-2xl text-ink-secondary hover:text-ink-primary hover:bg-white/80 border border-transparent hover:border-white/60 flex flex-col items-center justify-center gap-1 pressable group" title="Menú & Catálogo">
+          <i data-lucide="utensils" class="w-5 h-5"></i>
+          <span class="text-[9px] font-bold tracking-tight">Menú</span>
+        </button>
+
+        <!-- 5. Ajustes & WhatsApp -->
+        <button id="nav-settings" onclick="switchMainTab('settings')" class="w-12 h-12 rounded-2xl text-ink-secondary hover:text-ink-primary hover:bg-white/80 border border-transparent hover:border-white/60 flex flex-col items-center justify-center gap-1 pressable group" title="Configuraciones">
+          <i data-lucide="sliders-horizontal" class="w-5 h-5"></i>
+          <span class="text-[9px] font-bold tracking-tight">Ajustes</span>
+        </button>
+      </nav>
+    </div>
+
+    <!-- Base del Rail: Conexión & Avatar -->
+    <div class="flex flex-col items-center gap-4">
+      <div class="w-3 h-3 rounded-full bg-jade ring-4 ring-emerald-200/60 animate-pulse" title="WhatsApp Conectado (Evolution API / Meta)"></div>
+      <div class="w-10 h-10 rounded-2xl bg-white/80 border border-white flex items-center justify-center font-bold text-xs text-ink-primary shadow-2xs" title="Turno Activo: Cocina Principal">
+        LG
+      </div>
+    </div>
+  </aside>
+
+  <!-- ========================================================= -->
+  <!-- 2. CONTENEDOR PRINCIPAL FLOTANTE                          -->
+  <!-- ========================================================= -->
+  <div class="flex-1 flex flex-col min-w-0 gap-3 relative z-10">
+
+    <!-- CABECERA FLOTANTE DE VIDRIO (LIQUID HEADER) -->
+    <header class="h-16 px-5 liquid-header rounded-3xl flex items-center justify-between shrink-0 select-none">
+      <div class="flex items-center gap-3">
+        <h1 id="page-title" class="text-lg font-extrabold text-ink-primary tracking-tight flex items-center gap-2.5">
+          <span>KDS Cocina</span>
+          <span id="active-orders-pill" class="text-xs font-mono font-bold text-crimson px-2.5 py-0.5 rounded-full bg-crimson-subtle border border-red-200">8 en Cola</span>
+        </h1>
+      </div>
+
+      <!-- CONTROLES Y HERRAMIENTAS OPERATIVAS -->
+      <div class="flex items-center gap-2.5">
+        <!-- Selector de Densidad (4 vs 5 Columnas) -->
+        <div id="grid-cols-selector" class="flex items-center bg-white/60 p-0.5 rounded-xl border border-white/80 text-xs font-bold text-ink-secondary">
+          <button onclick="setGridColumns(4)" id="btn-col-4" class="px-2.5 py-1 rounded-lg bg-white text-ink-primary shadow-xs font-mono">4 cols (2x4)</button>
+          <button onclick="setGridColumns(5)" id="btn-col-5" class="px-2.5 py-1 rounded-lg hover:text-ink-primary font-mono">5 cols (2x5)</button>
+        </div>
+
+        <!-- Filtro Rápido por Canal -->
+        <div id="channel-filter-selector" class="flex items-center bg-white/60 p-0.5 rounded-xl border border-white/80 text-xs font-semibold text-ink-secondary">
+          <button onclick="filterChannel('all')" class="channel-btn active px-2.5 py-1 rounded-lg bg-white text-ink-primary shadow-xs font-bold">Todos</button>
+          <button onclick="filterChannel('Domicilio')" class="channel-btn px-2.5 py-1 rounded-lg hover:text-ink-primary flex items-center justify-center" title="A Domicilio"><i data-lucide="bike" class="w-3.5 h-3.5"></i></button>
+          <button onclick="filterChannel('Mesa')" class="channel-btn px-2.5 py-1 rounded-lg hover:text-ink-primary flex items-center justify-center" title="Comedor / Mesa"><i data-lucide="utensils" class="w-3.5 h-3.5"></i></button>
+          <button onclick="filterChannel('Llevar')" class="channel-btn px-2.5 py-1 rounded-lg hover:text-ink-primary flex items-center justify-center" title="Para Llevar"><i data-lucide="shopping-bag" class="w-3.5 h-3.5"></i></button>
+        </div>
+
+        <div class="h-5 w-px bg-slate-200/70"></div>
+
+        <!-- Alerta Sonora -->
+        <button onclick="toggleAudio(this)" class="p-2 rounded-xl border border-white/80 bg-white/60 hover:bg-white text-ink-secondary pressable shadow-2xs" title="Sonido de Comandas Activado">
+          <i data-lucide="volume-2" class="w-4 h-4 text-jade" id="audio-icon"></i>
+        </button>
+
+        <!-- Pantalla Completa (Tablet o TV Cocina) -->
+        <button onclick="toggleFullScreen()" class="p-2 rounded-xl border border-white/80 bg-white/60 hover:bg-white text-ink-secondary pressable shadow-2xs" title="Modo Pantalla Completa">
+          <i data-lucide="maximize" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- ========================================================= -->
+    <!-- 3A. VISTA PRINCIPAL: MATRIZ TOAST KDS (LIQUID GLASS)      -->
+    <!-- ========================================================= -->
+    <main id="section-matrix" class="flex-1 flex flex-col min-h-0 gap-3">
+      <!-- Cuadrícula de Comandas con Scroll -->
+      <div class="flex-1 overflow-y-auto min-h-0 pr-1">
+        <div id="matrix-grid" class="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <!-- Renderizado dinámico vía JavaScript -->
+        </div>
+      </div>
+
+      <!-- BARRA INFERIOR FLOTANTE DE VIDRIO: ALL DAY TOTALS -->
+      <footer class="h-14 px-5 liquid-dock rounded-3xl flex items-center justify-between shrink-0 shadow-xs select-none">
+        <div class="flex items-center gap-3 overflow-x-auto py-1 text-xs">
+          <div class="flex items-center gap-1.5 font-extrabold text-ink-primary shrink-0 bg-white/90 px-3 py-1.5 rounded-xl border border-slate-200/80 shadow-2xs">
+            <span class="tracking-wide">TOTALES ALL DAY:</span>
+          </div>
+          <div id="all-day-summary" class="flex items-center gap-2">
+            <!-- Renderizado dinámico de totales -->
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3 shrink-0 pl-3">
+          <!-- Botón RECALL (Deshacer último despacho accidental) -->
+          <button id="recall-btn" onclick="recallLastOrder()" disabled class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-white/80 bg-white/60 text-ink-tertiary text-xs font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed pressable">
+            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+            <span id="recall-text">Deshacer (Recall)</span>
+          </button>
+        </div>
+      </footer>
+    </main>
+
+    <!-- ========================================================= -->
+    <!-- 4. CONSOLA DE CHATS & DESPACHO (COCKPIT DE 2 COLUMNAS)   -->
+    <!-- ========================================================= -->
+    <div id="section-chats" class="hidden flex-1 flex overflow-hidden min-h-0 relative gap-3">
+      <!-- COLUMNA 1: BANDEJA OPERATIVA DE CHATS (360px) -->
+      <div class="w-[360px] flex flex-col liquid-dock rounded-3xl p-3.5 space-y-2.5 shrink-0 select-none">
+          
+          <!-- Mini KPI Ribbon (design-system-dashboard) -->
+          <div class="grid grid-cols-3 gap-1.5 text-center">
+            <div onclick="filterChatList('handoff')" class="p-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-300/40 cursor-pointer transition-all flex flex-col items-center justify-center gap-1">
+              <div class="flex items-center gap-1.5">
+                <i data-lucide="alert-circle" class="w-3.5 h-3.5 text-ochre"></i>
+                <span class="font-mono font-extrabold text-sm text-ochre">1</span>
+              </div>
+              <div class="text-[9px] font-bold text-ink-secondary truncate">Atención Requerida</div>
+            </div>
+            <div onclick="filterChatList('bot')" class="p-2 rounded-xl bg-jade-subtle hover:bg-emerald-100/50 border border-emerald-300/30 cursor-pointer transition-all flex flex-col items-center justify-center gap-1">
+              <div class="flex items-center gap-1.5">
+                <i data-lucide="bot" class="w-3.5 h-3.5 text-jade"></i>
+                <span class="font-mono font-extrabold text-sm text-jade">6</span>
+              </div>
+              <div class="text-[9px] font-bold text-ink-secondary truncate">Con Bot IA</div>
+            </div>
+            <div onclick="filterChatList('order')" class="p-2 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 border border-blue-300/30 cursor-pointer transition-all flex flex-col items-center justify-center gap-1">
+              <div class="flex items-center gap-1.5">
+                <i data-lucide="receipt" class="w-3.5 h-3.5 text-periwinkle-ink"></i>
+                <span class="font-mono font-extrabold text-sm text-periwinkle-ink">5</span>
+              </div>
+              <div class="text-[9px] font-bold text-ink-secondary truncate">Con Pedido Activo</div>
+            </div>
+          </div>
+
+          <!-- Buscador & Filtros de Píldora -->
+          <div class="space-y-1.5">
+            <div class="relative">
+              <i data-lucide="search" class="w-3.5 h-3.5 text-ink-tertiary absolute left-3 top-2.5"></i>
+              <input type="text" id="chat-search-input" onkeyup="searchChats(this.value)" placeholder="Buscar cliente, teléfono o #orden..." class="w-full pl-8 pr-3 py-1.5 bg-white/80 border border-white/90 rounded-xl text-xs font-medium text-ink-primary focus:outline-none focus:ring-2 focus:ring-jade/40 shadow-2xs">
+            </div>
+            <div class="flex gap-1 text-[10px] font-bold">
+              <button onclick="filterChatList('all')" id="chat-tab-all" class="px-2.5 py-1 rounded-lg bg-white text-ink-primary shadow-2xs font-extrabold">Todos (8)</button>
+              <button onclick="filterChatList('handoff')" id="chat-tab-handoff" class="px-2 py-1 rounded-lg hover:bg-white/60 text-ochre">Handoff (1)</button>
+              <button onclick="filterChatList('active')" id="chat-tab-active" class="px-2 py-1 rounded-lg hover:bg-white/60 text-ink-secondary">En Cocina (5)</button>
+            </div>
+          </div>
+
+          <!-- Lista de Conversaciones Ricas -->
+          <div id="chat-list-container" class="flex-1 overflow-y-auto space-y-1.5 pr-1">
+            <!-- Conversación 1: Sarah Martínez (Seleccionada) -->
+            <div onclick="selectChatConversation('11613')" id="chat-item-11613" class="chat-list-item active p-2.5 bg-white/90 rounded-2xl border border-white shadow-2xs border-l-4 border-l-periwinkle-ink cursor-pointer transition-all">
+              <div class="flex items-start justify-between">
+                <div class="flex items-center gap-2 min-w-0">
+                  <div class="w-9 h-9 rounded-xl bg-periwinkle-tint font-extrabold text-xs flex items-center justify-center text-periwinkle-ink shrink-0 border border-white shadow-2xs">SM</div>
+                  <div class="min-w-0">
+                    <div class="flex items-center gap-1.5">
+                      <span class="font-extrabold text-xs text-ink-primary truncate">Sarah Martínez</span>
+                      <span class="font-mono text-[9px] font-bold px-1.5 py-0.2 rounded bg-slate-100 text-ink-secondary">#11613</span>
+                    </div>
+                    <div class="text-[10px] text-jade font-bold flex items-center gap-1 mt-0.5">
+                      <span>En Horno (18m)</span>
+                      <span>•</span>
+                      <span>$330</span>
+                    </div>
+                  </div>
+                </div>
+                <span class="font-mono text-[10px] text-ink-tertiary shrink-0">14:20</span>
+              </div>
+              <div class="text-[11px] text-ink-secondary truncate mt-1 pl-1 flex items-center gap-1">
+                <i data-lucide="mic" class="w-3 h-3 text-periwinkle-ink shrink-0"></i>
+                <span class="truncate">"Sí porfa con orilla de queso y sin..."</span>
+              </div>
+            </div>
+
+            <!-- Conversación 2: Elena Fuentes (Handoff Solicitado) -->
+            <div onclick="selectChatConversation('11615')" id="chat-item-11615" class="chat-list-item p-2.5 bg-amber-50/80 hover:bg-amber-100/70 rounded-2xl border border-amber-300/80 shadow-2xs border-l-4 border-l-ochre cursor-pointer transition-all">
+              <div class="flex items-start justify-between">
+                <div class="flex items-center gap-2 min-w-0">
+                  <div class="w-9 h-9 rounded-xl bg-amber-100 font-extrabold text-xs flex items-center justify-center text-amber-800 shrink-0 border border-white shadow-2xs">EF</div>
+                  <div class="min-w-0">
+                    <div class="flex items-center gap-1.5">
+                      <span class="font-extrabold text-xs text-ink-primary truncate">Elena Fuentes</span>
+                      <span class="font-mono text-[9px] font-bold px-1.5 py-0.2 rounded bg-amber-200/60 text-amber-900">#11615</span>
+                    </div>
+                    <div class="text-[10px] text-ochre font-extrabold flex items-center gap-1 mt-0.5">
+                      <span>Requiere Asesor Humano</span>
+                    </div>
+                  </div>
+                </div>
+                <span class="font-mono text-[10px] text-ochre font-bold shrink-0">14:02</span>
+              </div>
+              <div class="text-[11px] text-amber-900 font-medium truncate mt-1 pl-1">
+                "¿Tienen masa sin gluten o vegana hoy?"
+              </div>
+            </div>
+
+            <!-- Conversación 3: Carlos Robles (Mesa 2) -->
+            <div onclick="selectChatConversation('11614')" id="chat-item-11614" class="chat-list-item p-2.5 bg-white/50 hover:bg-white/80 rounded-2xl border border-transparent hover:border-white cursor-pointer transition-all">
+              <div class="flex items-start justify-between">
+                <div class="flex items-center gap-2 min-w-0">
+                  <div class="w-9 h-9 rounded-xl bg-slate-100 font-extrabold text-xs flex items-center justify-center text-ink-primary shrink-0 border border-white shadow-2xs">CR</div>
+                  <div class="min-w-0">
+                    <div class="flex items-center gap-1.5">
+                      <span class="font-extrabold text-xs text-ink-primary truncate">Carlos Robles</span>
+                      <span class="font-mono text-[9px] font-bold px-1.5 py-0.2 rounded bg-slate-100 text-ink-secondary">Mesa 2</span>
+                    </div>
+                    <div class="text-[10px] text-ink-secondary font-medium mt-0.5">
+                      Hamburguesa Doble • $210
+                    </div>
+                  </div>
+                </div>
+                <span class="font-mono text-[10px] text-ink-tertiary shrink-0">14:15</span>
+              </div>
+              <div class="text-[11px] text-ink-secondary truncate mt-1 pl-1">
+                "La cerveza con limón por favor"
+              </div>
+            </div>
+
+            <!-- Conversación 4: Rodrigo Vega (Preview / Armando pedido en WhatsApp) -->
+            <div onclick="selectChatConversation('11620')" id="chat-item-11620" class="chat-list-item p-2.5 bg-white/40 hover:bg-white/70 rounded-2xl border border-dashed border-slate-300 cursor-pointer transition-all">
+              <div class="flex items-start justify-between">
+                <div class="flex items-center gap-2 min-w-0">
+                  <div class="w-9 h-9 rounded-xl bg-slate-100 font-extrabold text-xs flex items-center justify-center text-ink-primary shrink-0 border border-white">RV</div>
+                  <div class="min-w-0">
+                    <div class="flex items-center gap-1.5">
+                      <span class="font-extrabold text-xs text-ink-primary truncate">Rodrigo Vega</span>
+                      <span class="text-[9px] font-bold px-1.5 py-0.2 rounded bg-purple-100 text-purple-800">Armando</span>
+                    </div>
+                    <div class="text-[10px] text-purple-700 font-medium mt-0.5">
+                      Eligiendo especialidad...
+                    </div>
+                  </div>
+                </div>
+                <span class="font-mono text-[10px] text-ink-tertiary shrink-0">14:24</span>
+              </div>
+              <div class="text-[11px] text-ink-secondary truncate mt-1 pl-1">
+                "¿Qué ingredientes lleva la Mexicana?"
+              </div>
+            </div>
+
+            <!-- Conversación 5: Miguel Ángel R. (Domicilio) -->
+            <div onclick="selectChatConversation('11616')" id="chat-item-11616" class="chat-list-item p-2.5 bg-white/50 hover:bg-white/80 rounded-2xl border border-transparent hover:border-white cursor-pointer transition-all">
+              <div class="flex items-start justify-between">
+                <div class="flex items-center gap-2 min-w-0">
+                  <div class="w-9 h-9 rounded-xl bg-slate-100 font-extrabold text-xs flex items-center justify-center text-ink-primary shrink-0 border border-white">MR</div>
+                  <div class="min-w-0">
+                    <div class="flex items-center gap-1.5">
+                      <span class="font-extrabold text-xs text-ink-primary truncate">Miguel Ángel R.</span>
+                      <span class="font-mono text-[9px] font-bold px-1.5 py-0.2 rounded bg-slate-100 text-ink-secondary">Domicilio</span>
+                    </div>
+                    <div class="text-[10px] text-jade font-bold mt-0.5">
+                      2x Hawaiana Grande • $390
+                    </div>
+                  </div>
+                </div>
+                <span class="font-mono text-[10px] text-ink-tertiary shrink-0">14:10</span>
+              </div>
+              <div class="text-[11px] text-ink-secondary truncate mt-1 pl-1 flex items-center gap-1">
+                <i data-lucide="image" class="w-3 h-3 text-jade shrink-0"></i>
+                <span>Comprobante SPEI enviado</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- COLUMNA 2: CONSOLA DE CHAT Y COCKPIT DE DESPACHO (Flex-1) -->
+        <div class="flex-1 flex flex-col min-w-0 liquid-dock rounded-3xl border border-white/90 p-3.5 justify-between relative overflow-hidden">
+          
+          <!-- 2A. COCKPIT SUPERIOR DE LA ORDEN ACTIVA (TOP ORDER BAR) -->
+          <div class="px-4 py-2.5 liquid-dock rounded-2xl flex items-center justify-between shrink-0 mb-2.5 shadow-2xs border border-white/95 select-none">
+            <div class="flex items-center gap-3 min-w-0">
+              <div class="w-10 h-10 rounded-2xl bg-periwinkle-tint font-extrabold text-xs flex items-center justify-center text-periwinkle-ink shrink-0 shadow-2xs border border-white" id="main-chat-avatar">
+                SM
+              </div>
+              <div class="min-w-0">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span class="font-extrabold text-sm text-ink-primary" id="main-chat-name">Sarah Martínez</span>
+                  <span class="font-mono text-xs font-bold px-2 py-0.5 rounded-md bg-white/80 border border-whisper text-ink-secondary" id="main-chat-order">#11613</span>
+                  <span class="text-xs font-bold px-2 py-0.5 rounded-md bg-amber-100/80 border border-amber-300 text-amber-900 flex items-center gap-1" id="main-chat-stage">
+                    <i data-lucide="flame" class="w-3 h-3 text-amber-600"></i>
+                    <span>En Horno (18:40m)</span>
+                  </span>
+                  <span class="text-xs font-bold px-2 py-0.5 rounded-md bg-emerald-100/80 border border-emerald-300 text-emerald-900" id="main-chat-paid">
+                    Pagado ($330)
+                  </span>
+                </div>
+                <div class="text-[11px] text-ink-secondary flex items-center gap-3 mt-0.5 font-medium" id="main-chat-details">
+                  <span>Av. Revolución 340, Depto 4B</span>
+                  <span>•</span>
+                  <span>1x Pepperoni Fam, 2x Coca-Cola</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Acciones Rápidas del Cockpit -->
+            <div class="flex items-center gap-2 shrink-0">
+              <!-- Switch de Modo IA vs Humano -->
+              <button id="main-chat-handoff-btn" onclick="toggleMainChatHandoff()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 border border-white/90 text-ink-primary font-bold text-xs pressable shadow-2xs">
+                <span class="w-2.5 h-2.5 rounded-full bg-jade" id="main-chat-bot-dot"></span>
+                <span id="main-chat-bot-label">Modo IA (Activo)</span>
+              </button>
+
+              <!-- Botón para abrir el Drawer de Memoria/Ficha -->
+              <button onclick="toggleCustomerDrawer()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/80 hover:bg-white border border-white/90 text-ink-primary font-bold text-xs pressable shadow-2xs" title="Ver Ficha y Bloc del Mesero">
+                <i data-lucide="user-check" class="w-4 h-4 text-jade"></i>
+                <span>Ficha & Bloc</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 2B. TIMELINE DE MENSAJES ESPACIOSO -->
+          <div id="main-chat-timeline" class="flex-1 overflow-y-auto space-y-3 p-4 liquid-dock rounded-2xl border border-white/80 text-xs min-h-0">
+            <!-- Mensaje 1: Cliente -->
+            <div class="flex flex-col items-start max-w-[70%]">
+              <div class="bg-periwinkle-tint/85 border border-white/90 p-3 rounded-2xl rounded-tl-xs text-xs text-ink-primary leading-relaxed shadow-2xs">
+                Hola buenas tardes, ¿tienen servicio a domicilio ahorita?
+              </div>
+              <span class="text-[10px] font-mono text-ink-tertiary mt-1 px-1">14:18</span>
+            </div>
+
+            <!-- Mensaje 2: Bot IA -->
+            <div class="flex flex-col items-end max-w-[70%] ml-auto">
+              <div class="bg-white/95 border border-white p-3 rounded-2xl rounded-tr-xs text-xs text-ink-primary leading-relaxed shadow-2xs">
+                ¡Hola Sarah! Sí, claro que sí. Tenemos registrado tu domicilio en <b>Av. Revolución 340, Depto 4B</b>. ¿Deseas pedir lo de siempre (Pizza Pepperoni Familiar)?
+              </div>
+              <span class="text-[10px] font-mono text-ink-secondary mt-1 px-1 flex items-center gap-1">
+                <span>ChatAliado Bot</span> • <span>14:18</span>
+              </span>
+            </div>
+
+            <!-- Mensaje 3: NOTA DE VOZ DE WHATSAPP (Audio Player Real) -->
+            <div class="flex flex-col items-start max-w-[75%]">
+              <div class="bg-periwinkle-tint/85 border border-white/90 p-3 rounded-2xl rounded-tl-xs shadow-2xs space-y-2">
+                <div class="flex items-center gap-3">
+                  <button class="w-8 h-8 rounded-full bg-periwinkle-ink text-white flex items-center justify-center pressable shrink-0 shadow-2xs">
+                    <i data-lucide="play" class="w-4 h-4 fill-white translate-x-0.5"></i>
+                  </button>
+                  <div class="flex-1 space-y-1">
+                    <div class="flex items-center gap-1 h-5">
+                      <span class="w-1 h-3 bg-periwinkle-ink/40 rounded-full"></span>
+                      <span class="w-1 h-5 bg-periwinkle-ink rounded-full"></span>
+                      <span class="w-1 h-2 bg-periwinkle-ink/50 rounded-full"></span>
+                      <span class="w-1 h-4 bg-periwinkle-ink rounded-full"></span>
+                      <span class="w-1 h-6 bg-periwinkle-ink rounded-full"></span>
+                      <span class="w-1 h-3 bg-periwinkle-ink/40 rounded-full"></span>
+                      <span class="w-1 h-5 bg-periwinkle-ink rounded-full"></span>
+                      <span class="w-1 h-2 bg-periwinkle-ink/30 rounded-full"></span>
+                    </div>
+                    <div class="flex justify-between text-[9px] font-mono text-ink-secondary">
+                      <span>0:00</span>
+                      <span>0:24</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="p-2 rounded-xl bg-white/70 border border-white text-[11px] text-ink-primary font-medium flex items-start gap-1.5">
+                  <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5"></i>
+                  <span><i>"Transcripción: Sí porfa la familiar pero que la orilla venga rellena de queso y sin cebolla en la salsa, y 2 cocas de 600 frías..."</i></span>
+                </div>
+              </div>
+              <span class="text-[10px] font-mono text-ink-tertiary mt-1 px-1">14:19</span>
+            </div>
+
+            <!-- Mensaje 4: Bot Resumen de Pedido -->
+            <div class="flex flex-col items-end max-w-[70%] ml-auto">
+              <div class="bg-white/95 border border-white p-3 rounded-2xl rounded-tr-xs text-xs text-ink-primary leading-relaxed shadow-2xs space-y-2">
+                <div>
+                  ¡Anotado con orilla rellena y sin cebolla! Aquí está el resumen de tu orden:
+                </div>
+                <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-mono space-y-1">
+                  <div class="font-bold text-ink-primary">Comanda #11613 enviada a Cocina:</div>
+                  <div>• 1x Pizza Pepperoni Familiar (Orilla Rellena) — $260</div>
+                  <div>• 2x Refresco Coca-Cola 600ml — $70</div>
+                  <div class="font-bold text-jade pt-1 border-t border-slate-200">Total: $330 MXN (Efectivo con $500)</div>
+                </div>
+              </div>
+              <span class="text-[10px] font-mono text-ink-secondary mt-1 px-1 flex items-center gap-1">
+                <span>ChatAliado</span> • <span>14:20</span>
+              </span>
+            </div>
+          </div>
+
+          <!-- 2C. BARRA DE RESPUESTAS RÁPIDAS DE 1 CLIC (SMART COPILOT) -->
+          <div class="py-1.5 flex items-center gap-1.5 overflow-x-auto text-xs shrink-0 select-none">
+            <span class="text-[10px] font-extrabold text-ink-tertiary uppercase tracking-wider shrink-0 flex items-center gap-1">
+              <span>Respuestas Rápidas:</span>
+            </span>
+            <button onclick="insertQuickReply('¡Hola Sarah! Tu pizza está saliendo del horno en este momento.')" class="px-2.5 py-1 rounded-xl bg-white/80 hover:bg-white border border-white/90 text-ink-primary text-xs font-semibold pressable whitespace-nowrap shadow-2xs">
+              "Ya está en el horno"
+            </button>
+            <button onclick="insertQuickReply('El repartidor ya va en camino hacia Av. Revolución 340 (tiempo est. 12 min).')" class="px-2.5 py-1 rounded-xl bg-white/80 hover:bg-white border border-white/90 text-ink-primary text-xs font-semibold pressable whitespace-nowrap shadow-2xs">
+              "Repartidor en camino (12 min)"
+            </button>
+            <button onclick="insertQuickReply('Pago en efectivo confirmado, el repartidor lleva cambio de $170.')" class="px-2.5 py-1 rounded-xl bg-white/80 hover:bg-white border border-white/90 text-ink-primary text-xs font-semibold pressable whitespace-nowrap shadow-2xs">
+              "Lleva cambio de $170"
+            </button>
+          </div>
+
+          <!-- 2D. INPUT DE ENTRADA CON ADJUNTO Y ENVÍO -->
+          <div class="flex items-center gap-2 shrink-0 pt-0.5">
+            <button class="p-2.5 rounded-2xl bg-white/80 hover:bg-white border border-white text-ink-secondary pressable shadow-2xs" title="Adjuntar foto de comprobante o menú">
+              <i data-lucide="paperclip" class="w-4 h-4"></i>
+            </button>
+            <input id="main-chat-input" onkeydown="if(event.key==='Enter') sendMainChatMessage()" type="text" placeholder="Escribe un mensaje para responder directo a WhatsApp..." class="flex-1 px-4 py-2.5 bg-white/90 border border-white rounded-2xl text-xs text-ink-primary focus:outline-none focus:ring-2 focus:ring-jade/40 shadow-2xs">
+            <button onclick="sendMainChatMessage()" class="px-5 py-2.5 bg-jade hover:bg-jade-hover text-white text-xs font-bold rounded-2xl pressable flex items-center gap-2 shadow-2xs shrink-0">
+              <i data-lucide="send" class="w-4 h-4"></i>
+              <span>Enviar</span>
+            </button>
+          </div>
+
+          <!-- 3. DRAWER FLOTANTE DE VIDRIO: FICHA DE CLIENTE Y BLOC (DESLIZANTE) -->
+          <div id="customer-drawer" class="absolute top-0 right-0 bottom-0 w-80 liquid-panel rounded-r-2xl border-l border-white/90 p-4 shadow-2xl flex flex-col justify-between transition-transform duration-300 ease-out translate-x-full z-30">
+            <div class="space-y-4 overflow-y-auto">
+              <div class="flex items-center justify-between pb-3 border-b border-white/80">
+                <div class="font-extrabold text-xs text-ink-primary uppercase tracking-wider flex items-center gap-1.5">
+                  <i data-lucide="user-check" class="w-4 h-4 text-jade"></i>
+                  <span>Ficha de Cliente & Memoria</span>
+                </div>
+                <button onclick="toggleCustomerDrawer()" class="p-1 rounded-lg text-ink-tertiary hover:text-ink-primary pressable">
+                  <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+              </div>
+
+              <div class="liquid-card p-3 rounded-xl border border-white space-y-1.5 text-xs shadow-2xs">
+                <div class="font-extrabold text-sm text-ink-primary" id="drawer-client-name">Sarah Martínez</div>
+                <div class="font-mono text-ink-secondary text-[11px]" id="drawer-client-phone">+52 55 4920 1192</div>
+                <div class="text-[11px] text-jade font-bold">Cliente Frecuente (14 órdenes)</div>
+                <div class="text-[11px] text-ink-secondary font-mono">Gasto acumulado: $4,620 MXN</div>
+              </div>
+
+              <div class="space-y-2">
+                <div class="text-xs font-extrabold text-ink-primary flex items-center gap-1.5">
+                  <i data-lucide="book-open" class="w-3.5 h-3.5 text-jade"></i>
+                  <span>Bloc del Mesero (notes_md)</span>
+                </div>
+                <div class="liquid-card p-3 rounded-xl border border-white text-xs leading-relaxed font-mono space-y-1 text-ink-primary shadow-2xs">
+                  <div><b>Dirección:</b> Av. Revolución 340, 4B</div>
+                  <div><b>Alergia:</b> Sin cebolla en la salsa</div>
+                  <div><b>Favorita:</b> Pepperoni con orilla</div>
+                  <div><b>Pago habitual:</b> Efectivo ($500)</div>
+                </div>
+                <p class="text-[10px] text-ink-tertiary italic">El agente de IA consulta este bloc en Supabase antes de generar cada respuesta en WhatsApp.</p>
+              </div>
+            </div>
+
+            <div class="pt-3 border-t border-white/80">
+              <button onclick="toggleCustomerDrawer()" class="w-full py-2 bg-white hover:bg-slate-50 border border-white rounded-xl text-xs font-bold text-ink-secondary pressable shadow-2xs">
+                Cerrar Ficha
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    <!-- ========================================================= -->
+    <!-- 5. MENÚ & CATÁLOGO EN LIQUID GLASS                        -->
+    <!-- ========================================================= -->
+    <div id="section-menu" class="hidden flex-1 overflow-y-auto pr-1">
+      <div class="max-w-4xl mx-auto space-y-4">
+        <div class="liquid-header p-5 rounded-3xl flex items-center justify-between">
+          <div>
+            <h2 class="text-lg font-extrabold text-ink-primary">Catálogo de Platillos & Modificadores</h2>
+            <p class="text-xs text-ink-secondary">Pausa platillos agotados al instante para que el bot de WhatsApp deje de ofrecerlos.</p>
+          </div>
+          <button class="px-4 py-2 bg-jade hover:bg-jade-hover text-white text-xs font-bold rounded-xl pressable flex items-center gap-2 shadow-2xs">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            <span>Nuevo Platillo</span>
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Platillo 1 -->
+          <div class="liquid-card p-4 rounded-2xl border border-white flex items-center justify-between">
+            <div>
+              <div class="font-extrabold text-sm text-ink-primary">Pizza Pepperoni Clásica</div>
+              <div class="text-xs text-ink-secondary">Familiar ($260) • Mediana ($210)</div>
+              <span class="mt-1.5 inline-block text-[10px] font-bold px-2 py-0.5 rounded-md bg-jade-subtle text-jade">Disponible en WhatsApp</span>
+            </div>
+            <button class="px-3 py-1.5 rounded-xl border border-whisper bg-white hover:bg-slate-50 text-xs font-bold text-ink-secondary pressable">Pausar</button>
+          </div>
+
+          <!-- Platillo 2 -->
+          <div class="liquid-card p-4 rounded-2xl border border-white flex items-center justify-between">
+            <div>
+              <div class="font-extrabold text-sm text-ink-primary">Pizza Hawaiana Especial</div>
+              <div class="text-xs text-ink-secondary">Familiar ($250) • Mediana ($200)</div>
+              <span class="mt-1.5 inline-block text-[10px] font-bold px-2 py-0.5 rounded-md bg-jade-subtle text-jade">Disponible en WhatsApp</span>
+            </div>
+            <button class="px-3 py-1.5 rounded-xl border border-whisper bg-white hover:bg-slate-50 text-xs font-bold text-ink-secondary pressable">Pausar</button>
+          </div>
+
+          <!-- Platillo 3 (Agotado) -->
+          <div class="liquid-card p-4 rounded-2xl border border-amber-200 bg-amber-50/40 flex items-center justify-between opacity-80">
+            <div>
+              <div class="font-extrabold text-sm text-ink-primary">Alitas Mango Habanero</div>
+              <div class="text-xs text-ink-secondary">Orden de 8 piezas ($145)</div>
+              <span class="mt-1.5 inline-block text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-100 text-amber-900">Pausado (Agotado en Cocina)</span>
+            </div>
+            <button class="px-3 py-1.5 rounded-xl border border-amber-300 bg-white hover:bg-amber-50 text-xs font-bold text-amber-900 pressable">Reactivar</button>
+          </div>
+
+          <!-- Platillo 4 -->
+          <div class="liquid-card p-4 rounded-2xl border border-white flex items-center justify-between">
+            <div>
+              <div class="font-extrabold text-sm text-ink-primary">Hamburguesa Doble Queso</div>
+              <div class="text-xs text-ink-secondary">Con papas francesas ($180)</div>
+              <span class="mt-1.5 inline-block text-[10px] font-bold px-2 py-0.5 rounded-md bg-jade-subtle text-jade">Disponible en WhatsApp</span>
+            </div>
+            <button class="px-3 py-1.5 rounded-xl border border-whisper bg-white hover:bg-slate-50 text-xs font-bold text-ink-secondary pressable">Pausar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- 6. CLIENTES & MEMORIA EN LIQUID GLASS                     -->
+    <!-- ========================================================= -->
+    <div id="section-customers" class="hidden flex-1 overflow-y-auto pr-1">
+      <div class="max-w-4xl mx-auto space-y-4">
+        <div class="liquid-header p-5 rounded-3xl">
+          <h2 class="text-lg font-extrabold text-ink-primary">Directorio de Clientes & Memoria Conversacional</h2>
+          <p class="text-xs text-ink-secondary">Historial de conversaciones y preferencias aprendidas por el agente LLM.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="liquid-card p-5 rounded-2xl border border-white space-y-3">
+            <div class="flex items-center gap-3">
+              <div class="w-11 h-11 rounded-2xl bg-periwinkle-tint font-extrabold text-sm flex items-center justify-center text-periwinkle-ink">SM</div>
+              <div>
+                <div class="font-extrabold text-sm text-ink-primary">Sarah Martínez</div>
+                <div class="text-xs font-mono text-ink-secondary">+52 55 4920 1192</div>
+              </div>
+            </div>
+            <div class="text-xs space-y-1 font-mono text-ink-secondary bg-white/70 p-3 rounded-xl border border-white">
+              <div>Dirección: Av. Revolución 340, Depto 4B</div>
+              <div>Favorita: Pepperoni Familiar con Orilla</div>
+              <div>Gasto total acumulado: $4,620 MXN</div>
+            </div>
+          </div>
+
+          <div class="liquid-card p-5 rounded-2xl border border-white space-y-3">
+            <div class="flex items-center gap-3">
+              <div class="w-11 h-11 rounded-2xl bg-slate-100 font-extrabold text-sm flex items-center justify-center text-ink-primary">CR</div>
+              <div>
+                <div class="font-extrabold text-sm text-ink-primary">Carlos Robles</div>
+                <div class="text-xs font-mono text-ink-secondary">+52 55 8392 0012</div>
+              </div>
+            </div>
+            <div class="text-xs space-y-1 font-mono text-ink-secondary bg-white/70 p-3 rounded-xl border border-white">
+              <div>Comedor / Mesa habitual: 2</div>
+              <div>Favorita: Hamburguesa Especial Doble</div>
+              <div>Gasto total acumulado: $2,180 MXN</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- 7. AJUSTES DEL RESTAURANTE & WHATSAPP                    -->
+    <!-- ========================================================= -->
+    <div id="section-settings" class="hidden flex-1 overflow-y-auto pr-1">
+      <div class="max-w-3xl mx-auto space-y-4">
+        <div class="liquid-header p-5 rounded-3xl">
+          <h2 class="text-lg font-extrabold text-ink-primary">Ajustes Generales del Restaurante</h2>
+          <p class="text-xs text-ink-secondary">Configuración de canales, bot de WhatsApp y tiempos de cocina.</p>
+        </div>
+
+        <div class="liquid-card p-5 rounded-2xl border border-white space-y-4">
+          <div class="text-xs font-extrabold text-ink-primary uppercase tracking-wider">Estado de WhatsApp (WhatsAppProvider)</div>
+          <div class="flex items-center justify-between p-3 rounded-xl bg-white/70 border border-white">
+            <div class="flex items-center gap-3">
+              <div class="w-3 h-3 rounded-full bg-jade ring-4 ring-emerald-200/50 animate-pulse"></div>
+              <div>
+                <div class="text-xs font-bold text-ink-primary">Evolution API (v2) Conectada vía QR</div>
+                <div class="text-[11px] font-mono text-ink-secondary">Instancia: chataliado-pizzeria-roma</div>
+              </div>
+            </div>
+            <span class="px-2.5 py-1 rounded-lg bg-jade-subtle text-jade text-[11px] font-bold">En Línea</span>
+          </div>
+        </div>
+
+        <div class="liquid-card p-5 rounded-2xl border border-white space-y-4">
+          <div class="text-xs font-extrabold text-ink-primary uppercase tracking-wider">Tiempos de Alerta en KDS</div>
+          <div class="grid grid-cols-2 gap-4 text-xs">
+            <div>
+              <label class="font-bold text-ink-secondary block mb-1">Minutos para Advertencia (Ámbar)</label>
+              <input type="number" value="8" class="w-full px-3 py-2 bg-white/80 border border-whisper rounded-xl font-mono text-ink-primary font-bold">
+            </div>
+            <div>
+              <label class="font-bold text-ink-secondary block mb-1">Minutos para Retraso Crítico (Rojo)</label>
+              <input type="number" value="15" class="w-full px-3 py-2 bg-white/80 border border-whisper rounded-xl font-mono text-ink-primary font-bold">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- 8. MODAL EMERGENTE RÁPIDO: "VER CHAT DE LA COMANDA"       -->
+  <!-- ========================================================= -->
+  <div id="chat-modal" class="fixed inset-0 z-50 modal-backdrop hidden items-center justify-center p-4">
+    <div class="liquid-panel w-full max-w-xl rounded-3xl border border-white shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+      
+      <div class="h-16 px-6 border-b border-white/80 flex items-center justify-between bg-white/70">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-periwinkle-tint font-extrabold text-sm flex items-center justify-center text-periwinkle-ink" id="modal-avatar">
+            SM
+          </div>
+          <div>
+            <div class="text-sm font-extrabold text-ink-primary flex items-center gap-2">
+              <span id="modal-name">Sarah Martínez</span>
+              <span class="font-mono text-xs font-bold px-2 py-0.5 rounded-md bg-white border border-whisper text-ink-secondary" id="modal-order">#11613</span>
+            </div>
+            <div class="text-xs font-mono text-ink-secondary" id="modal-phone">+52 55 4920 1192</div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button id="modal-handoff-btn" onclick="toggleModalHandoff()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 border border-whisper text-ink-primary font-bold text-xs pressable shadow-xs">
+            <span class="w-2.5 h-2.5 rounded-full bg-jade" id="modal-bot-dot"></span>
+            <span id="modal-bot-status">Modo IA (Activo)</span>
+          </button>
+          <button onclick="closeChatModal()" class="p-2 rounded-xl text-ink-tertiary hover:text-ink-primary hover:bg-slate-200/50 pressable">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="p-6 overflow-y-auto max-h-[360px] space-y-3 bg-[#F8FAFC]/70 text-xs">
+        <div class="flex flex-col items-start max-w-[85%]">
+          <div class="bg-periwinkle-tint/80 border border-white p-3 rounded-2xl rounded-tl-xs text-xs text-ink-primary leading-relaxed shadow-2xs">
+            Hola, quiero una pizza familiar de pepperoni por favor con orilla rellena.
+          </div>
+          <span class="text-[11px] font-mono text-ink-tertiary mt-1 px-1">14:19</span>
+        </div>
+
+        <div class="flex flex-col items-end max-w-[85%] ml-auto">
+          <div class="bg-white border border-white/90 p-3 rounded-2xl rounded-tr-xs text-xs text-ink-primary leading-relaxed shadow-2xs">
+            ¡Hola! Con gusto. Confirmamos entrega en <b id="modal-chat-address">Av. Revolución 340</b>. ¿Correcto?
+          </div>
+          <span class="text-[11px] font-mono text-ink-secondary mt-1 px-1 flex items-center gap-1">
+            <span>ChatAliado Bot</span> • <span>14:20</span>
+          </span>
+        </div>
+
+        <div class="flex flex-col items-start max-w-[85%]">
+          <div class="bg-periwinkle-tint/80 border border-white p-3 rounded-2xl rounded-tl-xs text-xs text-ink-primary leading-relaxed shadow-2xs">
+            Sí porfa, y 2 cocas de 600 bien frías. Pago con $500 en efectivo al repartidor.
+          </div>
+          <span class="text-[11px] font-mono text-ink-tertiary mt-1 px-1">14:20</span>
+        </div>
+
+        <div class="bg-white/90 p-3 rounded-xl border border-white text-xs space-y-1 font-mono text-ink-secondary shadow-2xs">
+          <div class="font-bold text-ink-primary">Pedido confirmado automáticamente:</div>
+          <div id="modal-order-summary-items">• 1x Pizza Pepperoni Familiar ($260)<br>• 2x Refresco Coca-Cola ($70)</div>
+          <div class="font-bold text-ink-primary pt-1 border-t border-slate-100" id="modal-order-total">Total: $330 MXN (Efectivo)</div>
+        </div>
+      </div>
+
+      <div class="p-4 bg-white/80 border-t border-white/90 flex items-center justify-between gap-3">
+        <button onclick="switchMainTab('chats'); closeChatModal();" class="text-xs font-bold text-periwinkle-ink hover:underline flex items-center gap-1.5 pressable shrink-0">
+          <span>Ir al Monitor Completo</span>
+          <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+        </button>
+
+        <div class="flex-1 flex gap-2">
+          <input type="text" placeholder="Escribir mensaje a WhatsApp..." class="flex-1 px-3.5 py-2 bg-white border border-whisper rounded-xl text-xs text-ink-primary focus:outline-none focus:ring-2 focus:ring-jade/40 shadow-2xs">
+          <button class="px-4 py-2 bg-jade hover:bg-jade-hover text-white text-xs font-bold rounded-xl pressable flex items-center gap-1.5 shadow-2xs">
+            <i data-lucide="send" class="w-4 h-4"></i>
+            <span>Enviar</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- 9. MOTOR JAVASCRIPT: GESTIÓN DE MATRIZ KDS & ALL-DAY      -->
+  <!-- ========================================================= -->
+  <script>
+    let orders = [
+      {
+        id: '11613',
+        name: 'Sarah Martínez',
+        phone: '+52 55 4920 1192',
+        channel: 'Domicilio',
+        channelIcon: 'bike',
+        channelBadge: 'Domicilio',
+        address: 'Av. Revolución 340, Depto 4B',
+        elapsedSeconds: 1120, // 18:40 min (Rojo)
+        paid: true,
+        total: '$330',
+        stage: 'new',
+        notes: 'Sin cebolla en la salsa',
+        items: [
+          { id: '11613-1', qty: 1, name: 'Pizza Pepperoni Familiar', mod: 'Orilla Rellena de Queso', done: false },
+          { id: '11613-2', qty: 2, name: 'Coca-Cola 600ml', mod: 'Bien fríos de refrigerador', done: true }
+        ]
+      },
+      {
+        id: '11614',
+        name: 'Carlos Robles',
+        phone: '+52 55 8392 0012',
+        channel: 'Mesa',
+        channelIcon: 'utensils',
+        channelBadge: 'Mesa 2',
+        address: 'Comedor Interior',
+        elapsedSeconds: 735, // 12:15 min (Ámbar)
+        paid: true,
+        total: '$210',
+        stage: 'prep',
+        notes: '',
+        items: [
+          { id: '11614-1', qty: 1, name: 'Hamburguesa Doble Queso', mod: 'Con papas sazonadas', done: false },
+          { id: '11614-2', qty: 1, name: 'Cerveza Corona 355ml', mod: 'Con limón y sal', done: false }
+        ]
+      },
+      {
+        id: '11615',
+        name: 'Elena Fuentes',
+        phone: '+52 55 1092 8841',
+        channel: 'Llevar',
+        channelIcon: 'shopping-bag',
+        channelBadge: 'Para Llevar',
+        address: 'Pasa a mostrador',
+        elapsedSeconds: 460, // 07:40 min (Fresco)
+        paid: false,
+        total: '$285',
+        stage: 'new',
+        notes: '',
+        items: [
+          { id: '11615-1', qty: 1, name: 'Pizza Cuatro Quesos Med.', mod: 'Masa delgada crujiente', done: false },
+          { id: '11615-2', qty: 1, name: 'Alitas BBQ (8pz)', mod: 'Aderezo ranch extra', done: false }
+        ]
+      },
+      {
+        id: '11616',
+        name: 'Miguel Ángel R.',
+        phone: '+52 55 7765 4321',
+        channel: 'Domicilio',
+        channelIcon: 'bike',
+        channelBadge: 'Domicilio',
+        address: 'Calle Juárez 45, Col. Centro',
+        elapsedSeconds: 310, // 05:10 min
+        paid: true,
+        total: '$390',
+        stage: 'prep',
+        notes: 'Timbre descompuesto, tocar fuerte',
+        items: [
+          { id: '11616-1', qty: 2, name: 'Pizza Hawaiana Grande', mod: 'Extra piña', done: false },
+          { id: '11616-2', qty: 1, name: 'Papas Francesas Gdes.', mod: 'Con queso cheddar', done: false }
+        ]
+      },
+      {
+        id: '11617',
+        name: 'Valeria Gómez',
+        phone: '+52 55 3344 5566',
+        channel: 'Mesa',
+        channelIcon: 'utensils',
+        channelBadge: 'Mesa 5',
+        address: 'Terraza exterior',
+        elapsedSeconds: 245, // 04:05 min
+        paid: true,
+        total: '$175',
+        stage: 'prep',
+        notes: '',
+        items: [
+          { id: '11617-1', qty: 1, name: 'Pizza Vegetariana Med.', mod: 'Sin champiñones', done: false },
+          { id: '11617-2', qty: 1, name: 'Agua de Jamaica 500ml', mod: 'Poco dulce', done: false }
+        ]
+      },
+      {
+        id: '11618',
+        name: 'Fernando Luna',
+        phone: '+52 55 9988 7711',
+        channel: 'Domicilio',
+        channelIcon: 'bike',
+        channelBadge: 'Domicilio',
+        address: 'Av. Insurgentes Sur 1200',
+        elapsedSeconds: 192, // 03:12 min
+        paid: false,
+        total: '$420',
+        stage: 'new',
+        notes: '',
+        items: [
+          { id: '11618-1', qty: 1, name: 'Pizza Carnes Frías Fam.', mod: 'Salsa chipotle suave', done: false },
+          { id: '11618-2', qty: 1, name: 'Dedos de Queso (6pz)', mod: 'Salsa marinara', done: false },
+          { id: '11618-3', qty: 1, name: 'Sprite 600ml', mod: '', done: false }
+        ]
+      },
+      {
+        id: '11619',
+        name: 'Lucía Méndez',
+        phone: '+52 55 2233 4455',
+        channel: 'Mesa',
+        channelIcon: 'utensils',
+        channelBadge: 'Mesa 1',
+        address: 'Comedor Principal',
+        elapsedSeconds: 110, // 01:50 min
+        paid: true,
+        total: '$160',
+        stage: 'new',
+        notes: '',
+        items: [
+          { id: '11619-1', qty: 1, name: 'Pizza Pepperoni Med.', mod: 'Tradicional', done: false },
+          { id: '11619-2', qty: 1, name: 'Agua Mineral 500ml', mod: '', done: false }
+        ]
+      },
+      {
+        id: '11620',
+        name: 'Rodrigo Vega',
+        phone: '+52 55 6677 8899',
+        channel: 'WhatsApp',
+        channelIcon: 'bot',
+        channelBadge: 'WhatsApp',
+        address: 'En conversación por bot...',
+        elapsedSeconds: 45, // 00:45 min
+        paid: false,
+        total: '$290',
+        isPreview: true, // Toast POS Preview Ticket!
+        stage: 'new',
+        notes: 'En proceso de confirmación',
+        items: [
+          { id: '11620-1', qty: 1, name: 'Pizza Mexicana Grande', mod: 'Jalapeño y chorizo', done: false },
+          { id: '11620-2', qty: 1, name: 'Fanta 600ml', mod: '', done: false }
+        ]
+      }
+    ];
+
+    let recallStack = [];
+    let currentViewMode = 'matrix';
+    let currentGridCols = 4;
+    let currentFilterChannel = 'all';
+
+    function renderMatrix() {
+      const grid = document.getElementById('matrix-grid');
+      if (!grid) return;
+      grid.innerHTML = '';
+
+      if (currentGridCols === 5) {
+        grid.className = "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3";
+      } else {
+        grid.className = "grid grid-cols-2 md:grid-cols-4 gap-3";
+      }
+
+      const filteredOrders = orders.filter(o => {
+        if (currentFilterChannel === 'all') return true;
+        return o.channel === currentFilterChannel;
+      });
+
+      const activeOrdersPill = document.getElementById('active-orders-pill');
+      if (activeOrdersPill) activeOrdersPill.textContent = `${orders.length} en Cola`;
+      const railBadge = document.getElementById('rail-badge-count');
+      if (railBadge) railBadge.textContent = orders.length;
+
+      filteredOrders.forEach((order) => {
+        const isUrgent = order.elapsedSeconds > 900;
+        const isWarning = order.elapsedSeconds > 480 && !isUrgent;
+
+        let headerBg = 'bg-white/70 border-white/80';
+        let timerColor = 'text-ink-secondary bg-white/80';
+        let borderCard = 'border-white/80';
+
+        if (order.isPreview) {
+          headerBg = 'bg-white/40 border-dashed border-slate-300';
+          borderCard = 'border-dashed border-slate-300 bg-white/40';
+        } else if (isUrgent) {
+          headerBg = 'bg-red-50/80 border-red-200';
+          timerColor = 'text-crimson bg-white font-extrabold border border-red-200';
+          borderCard = 'border-red-300 ring-1 ring-red-200';
+        } else if (isWarning) {
+          headerBg = 'bg-amber-50/80 border-amber-200';
+          timerColor = 'text-ochre bg-white font-extrabold border border-amber-200';
+          borderCard = 'border-amber-300';
+        }
+
+        const mins = Math.floor(order.elapsedSeconds / 60);
+        const secs = (order.elapsedSeconds % 60).toString().padStart(2, '0');
+        const timerText = `${mins}:${secs} min`;
+
+        const card = document.createElement('div');
+        card.id = `order-card-${order.id}`;
+        card.className = `liquid-card rounded-2xl border ${borderCard} shadow-xs flex flex-col justify-between overflow-hidden text-xs relative select-none`;
+
+        let headerHTML = `
+          <div class="px-3 py-2 ${headerBg} border-b flex items-center justify-between">
+            <div class="flex items-center gap-1.5 min-w-0">
+              <span class="font-mono font-extrabold text-sm text-ink-primary shrink-0">#${order.id}</span>
+              <span class="font-bold text-xs text-ink-primary truncate">${order.name.split(' ')[0]}</span>
+            </div>
+            <div class="flex items-center gap-1 shrink-0">
+              <span class="font-mono text-[11px] px-1.5 py-0.5 rounded-md ${timerColor} flex items-center gap-1">
+                <i data-lucide="clock" class="w-3 h-3 ${isUrgent ? 'animate-spin' : ''}"></i>
+                <span>${timerText}</span>
+              </span>
+            </div>
+          </div>
+        `;
+
+        let subBarHTML = `
+          <div class="px-3 py-1.5 bg-white/40 border-b border-white/60 flex items-center justify-between text-[11px]">
+            <div class="flex items-center gap-1.5 truncate">
+              <span class="font-bold text-ink-primary">${order.channelBadge}</span>
+              ${order.paid 
+                ? `<span class="px-1.5 py-0.2 rounded font-bold text-[10px] bg-emerald-100/70 text-emerald-800">PAGADO</span>` 
+                : `<span class="px-1.5 py-0.2 rounded font-bold text-[10px] bg-red-100/70 text-red-800">COBRAR</span>`}
+            </div>
+            <button onclick="openChatModal('${order.name}', '${order.phone}', '${order.id}')" class="px-2 py-0.5 rounded-lg bg-periwinkle-tint hover:bg-blue-200 text-periwinkle-ink font-bold text-[10px] pressable flex items-center gap-1 shrink-0 shadow-2xs" title="Ver conversación">
+              <i data-lucide="message-circle" class="w-3 h-3"></i>
+              <span>Chat</span>
+            </button>
+          </div>
+        `;
+
+        if (order.isPreview) {
+          subBarHTML = `
+            <div class="px-3 py-1.5 bg-amber-50/80 border-b border-amber-200 flex items-center justify-between text-[10px] text-amber-900 font-bold">
+              <span class="flex items-center gap-1">
+                <i data-lucide="bot" class="w-3 h-3 text-amber-600"></i>
+                <span>PREVIEW: Cliente en WhatsApp</span>
+              </span>
+              <button onclick="openChatModal('${order.name}', '${order.phone}', '${order.id}')" class="px-1.5 py-0.5 rounded bg-white border border-amber-300 text-amber-900 font-bold text-[9px] pressable">
+                Ver
+              </button>
+            </div>
+          `;
+        }
+
+        let itemsHTML = `<div class="p-3 space-y-2 flex-1 overflow-y-auto max-h-[220px]">`;
+        order.items.forEach((item, itemIdx) => {
+          itemsHTML += `
+            <div onclick="toggleItemDone('${order.id}', ${itemIdx})" class="item-row ${item.done ? 'item-done' : ''} p-1.5 rounded-xl hover:bg-white/60 border border-transparent hover:border-white flex items-start gap-2">
+              <span class="item-check w-4 h-4 rounded-md border border-slate-300 flex items-center justify-center shrink-0 mt-0.5 text-[10px] font-bold">
+                ${item.done ? '<i data-lucide="check" class="w-2.5 h-2.5 text-white"></i>' : ''}
+              </span>
+              <div class="flex-1 min-w-0">
+                <div class="font-extrabold text-xs text-ink-primary flex justify-between leading-snug">
+                  <span>${item.qty}x ${item.name}</span>
+                </div>
+                ${item.mod ? `<div class="text-[11px] text-ink-secondary font-medium">• ${item.mod}</div>` : ''}
+              </div>
+            </div>
+          `;
+        });
+        if (order.notes) {
+          itemsHTML += `
+            <div class="mt-1.5 p-1.5 rounded-lg bg-red-50/80 border border-red-200 text-crimson font-bold text-[11px] flex items-center gap-1.5">
+              <i data-lucide="alert-triangle" class="w-3.5 h-3.5 shrink-0"></i>
+              <span class="truncate">${order.notes}</span>
+            </div>
+          `;
+        }
+        itemsHTML += `</div>`;
+
+        let footerHTML = `
+          <div class="p-2.5 bg-white/60 border-t border-white/80 flex items-center justify-between gap-2">
+            <span class="font-mono font-extrabold text-sm text-ink-primary pl-1">${order.total}</span>
+            <button onclick="bumpOrder('${order.id}')" class="py-1.5 px-3.5 rounded-xl bg-ink-primary hover:bg-slate-800 text-white font-bold text-xs tracking-tight flex items-center gap-1.5 pressable shadow-2xs">
+              <i data-lucide="check" class="w-3.5 h-3.5 text-jade"></i>
+              <span>Despachar</span>
+            </button>
+          </div>
+        `;
+
+        card.innerHTML = headerHTML + subBarHTML + itemsHTML + footerHTML;
+        grid.appendChild(card);
+      });
+
+      updateAllDaySummary();
+      lucide.createIcons();
+    }
+
+    function toggleItemDone(orderId, itemIndex) {
+      const order = orders.find(o => o.id === orderId);
+      if (!order) return;
+      order.items[itemIndex].done = !order.items[itemIndex].done;
+      renderMatrix();
+    }
+
+    function bumpOrder(orderId) {
+      const card = document.getElementById(`order-card-${orderId}`);
+      if (card) card.classList.add('bumped');
+      setTimeout(() => {
+        const orderIdx = orders.findIndex(o => o.id === orderId);
+        if (orderIdx > -1) {
+          recallStack.push(orders.splice(orderIdx, 1)[0]);
+          updateRecallButton();
+          renderMatrix();
+        }
+      }, 160);
+    }
+
+    function recallLastOrder() {
+      if (recallStack.length === 0) return;
+      orders.unshift(recallStack.pop());
+      updateRecallButton();
+      renderMatrix();
+    }
+
+    function updateRecallButton() {
+      const btn = document.getElementById('recall-btn');
+      const text = document.getElementById('recall-text');
+      if (recallStack.length > 0) {
+        btn.disabled = false;
+        btn.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-white/80 bg-periwinkle-tint hover:bg-blue-200 text-periwinkle-ink text-xs font-bold transition-all pressable shadow-2xs";
+        text.textContent = `Deshacer #${recallStack[recallStack.length - 1].id}`;
+      } else {
+        btn.disabled = true;
+        btn.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-white/80 bg-white/60 text-ink-tertiary text-xs font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed pressable";
+        text.textContent = "Deshacer (Recall)";
+      }
+      lucide.createIcons();
+    }
+
+    function updateAllDaySummary() {
+      const summaryContainer = document.getElementById('all-day-summary');
+      if (!summaryContainer) return;
+      summaryContainer.innerHTML = '';
+      const counts = {};
+      orders.forEach(order => {
+        order.items.forEach(item => {
+          if (!item.done) {
+            counts[item.name] = (counts[item.name] || 0) + item.qty;
+          }
+        });
+      });
+      const entries = Object.entries(counts);
+      if (entries.length === 0) {
+        summaryContainer.innerHTML = `<span class="text-ink-tertiary italic text-xs font-medium">Sin platillos pendientes.</span>`;
+        return;
+      }
+      entries.slice(0, 8).forEach(([name, qty]) => {
+        const badge = document.createElement('div');
+        badge.className = "px-3 py-1.5 rounded-xl bg-white border border-slate-300/90 font-mono flex items-center gap-2 whitespace-nowrap shadow-2xs";
+        badge.innerHTML = `<span class="font-extrabold text-sm text-slate-950 bg-slate-100 px-2 py-0.5 rounded-lg border border-slate-200">${qty}</span><span class="font-bold text-xs text-slate-900 tracking-tight">${name}</span>`;
+        summaryContainer.appendChild(badge);
+      });
+    }
+
+    function setViewMode(mode) {
+      currentViewMode = mode;
+      const matrixSec = document.getElementById('section-matrix');
+      if (matrixSec) matrixSec.classList.remove('hidden');
+      renderMatrix();
+      lucide.createIcons();
+    }
+
+    function setGridColumns(cols) {
+      currentGridCols = cols;
+      document.getElementById('btn-col-4').className = cols === 4 
+        ? "px-2.5 py-1 rounded-lg bg-white text-ink-primary shadow-xs font-mono" 
+        : "px-2.5 py-1 rounded-lg hover:text-ink-primary font-mono";
+      document.getElementById('btn-col-5').className = cols === 5 
+        ? "px-2.5 py-1 rounded-lg bg-white text-ink-primary shadow-xs font-mono" 
+        : "px-2.5 py-1 rounded-lg hover:text-ink-primary font-mono";
+      renderMatrix();
+    }
+
+    function filterChannel(ch) {
+      currentFilterChannel = ch;
+      document.querySelectorAll('.channel-btn').forEach(btn => {
+        btn.className = "channel-btn px-2.5 py-1 rounded-lg hover:text-ink-primary flex items-center justify-center";
+      });
+      event.target.className = "channel-btn active px-2.5 py-1 rounded-lg bg-white text-ink-primary shadow-xs font-bold flex items-center justify-center";
+      renderMatrix();
+    }
+
+    function switchMainTab(tab) {
+      document.getElementById('section-matrix').classList.add('hidden');
+      document.getElementById('section-chats').classList.add('hidden');
+      document.getElementById('section-menu').classList.add('hidden');
+      document.getElementById('section-customers').classList.add('hidden');
+      document.getElementById('section-settings').classList.add('hidden');
+
+      // Actualizar capa de degradado ambiental viva (Liquid Living Mesh)
+      document.querySelectorAll('.ambient-layer').forEach(layer => {
+        layer.classList.remove('active', 'entering');
+      });
+      const activeAmbient = document.getElementById('ambient-layer-' + tab);
+      if (activeAmbient) {
+        void activeAmbient.offsetWidth; // reiniciar animación CSS
+        activeAmbient.classList.add('active', 'entering');
+      }
+
+      // Disparar destello especular sobre el vidrio
+      const sheen = document.getElementById('ambient-sheen');
+      if (sheen) {
+        sheen.classList.remove('entering');
+        void sheen.offsetWidth;
+        sheen.classList.add('entering');
+      }
+
+      const gridCols = document.getElementById('grid-cols-selector');
+      const channelFilters = document.getElementById('channel-filter-selector');
+
+      ['kds', 'chats', 'customers', 'menu', 'settings'].forEach(id => {
+        const el = document.getElementById('nav-' + id);
+        if (el) {
+          el.className = "w-12 h-12 rounded-2xl text-ink-secondary hover:text-ink-primary hover:bg-white/80 border border-transparent hover:border-white/60 flex flex-col items-center justify-center gap-1 pressable group relative";
+        }
+      });
+
+      const activeNav = document.getElementById('nav-' + tab);
+      if (activeNav) {
+        activeNav.className = "w-12 h-12 rounded-2xl bg-periwinkle-tint text-periwinkle-ink flex flex-col items-center justify-center gap-1 pressable relative shadow-2xs border border-white/90";
+      }
+
+      if (tab === 'kds') {
+        document.getElementById('section-matrix').classList.remove('hidden');
+        if (gridCols) gridCols.classList.remove('hidden');
+        if (channelFilters) channelFilters.classList.remove('hidden');
+        document.getElementById('page-title').innerHTML = `
+          <span>KDS Cocina</span>
+          <span id="active-orders-pill" class="text-xs font-mono font-bold text-crimson px-2.5 py-0.5 rounded-full bg-crimson-subtle border border-red-200">${orders.length} en Cola</span>
+        `;
+        renderMatrix();
+      } else {
+        if (gridCols) gridCols.classList.add('hidden');
+        if (channelFilters) channelFilters.classList.add('hidden');
+
+        if (tab === 'chats') {
+          document.getElementById('section-chats').classList.remove('hidden');
+          document.getElementById('page-title').innerHTML = '<span>Monitor de Chats WhatsApp</span><span class="text-xs font-mono font-bold text-jade px-2.5 py-1 rounded-full bg-jade-subtle border border-emerald-200">2 Activos</span>';
+        } else if (tab === 'menu') {
+          document.getElementById('section-menu').classList.remove('hidden');
+          document.getElementById('page-title').innerHTML = '<span>Menú & Catálogo</span>';
+        } else if (tab === 'customers') {
+          document.getElementById('section-customers').classList.remove('hidden');
+          document.getElementById('page-title').innerHTML = '<span>Clientes & Memoria Conversacional</span>';
+        } else if (tab === 'settings') {
+          document.getElementById('section-settings').classList.remove('hidden');
+          document.getElementById('page-title').innerHTML = '<span>Ajustes del Restaurante</span>';
+        }
+      }
+      lucide.createIcons();
+    }
+
+    function openChatModal(name, phone, orderId) {
+      const order = orders.find(o => o.id === orderId);
+      document.getElementById('modal-name').textContent = name;
+      document.getElementById('modal-phone').textContent = phone;
+      document.getElementById('modal-order').textContent = '#' + orderId;
+      document.getElementById('modal-avatar').textContent = name.split(' ').map(n => n[0]).join('').substring(0, 2);
+      if (order) {
+        document.getElementById('modal-chat-address').textContent = order.address;
+        document.getElementById('modal-order-total').textContent = `Total: ${order.total} MXN (${order.paid ? 'Pagado' : 'Cobrar'})`;
+      }
+      const modal = document.getElementById('chat-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeChatModal() {
+      const modal = document.getElementById('chat-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    let isHumanMode = false;
+    function toggleModalHandoff() {
+      isHumanMode = !isHumanMode;
+      const dot = document.getElementById('modal-bot-dot');
+      const status = document.getElementById('modal-bot-status');
+      const btn = document.getElementById('modal-handoff-btn');
+
+      if (isHumanMode) {
+        dot.className = "w-2.5 h-2.5 rounded-full bg-ochre";
+        status.textContent = "Control Humano (Tú)";
+        btn.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-ochre-subtle border border-amber-300 text-ochre font-extrabold text-xs pressable shadow-xs";
+      } else {
+        dot.className = "w-2.5 h-2.5 rounded-full bg-jade";
+        status.textContent = "Modo IA (Activo)";
+        btn.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 border border-whisper text-ink-primary font-bold text-xs pressable shadow-xs";
+      }
+    }
+
+    function toggleHandoff(btn) {
+      if (btn.innerText.includes('Tomar Control')) {
+        btn.innerHTML = 'Devolver a IA';
+        btn.className = 'px-3 py-1 rounded-xl bg-ochre-subtle border border-amber-300 text-ochre text-xs font-bold pressable';
+      } else {
+        btn.innerHTML = 'Tomar Control';
+        btn.className = 'px-3 py-1 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-ink-primary text-xs font-bold pressable shadow-2xs';
+      }
+    }
+
+    function toggleFullScreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        document.exitFullscreen().catch(() => {});
+      }
+    }
+
+    let audioActive = true;
+    function toggleAudio(btn) {
+      audioActive = !audioActive;
+      const icon = document.getElementById('audio-icon');
+      if (audioActive) {
+        icon.className = "w-4 h-4 text-jade";
+      } else {
+        icon.className = "w-4 h-4 text-slate-400";
+      }
+    }
+
+    setInterval(() => {
+      orders.forEach(order => {
+        order.elapsedSeconds++;
+      });
+      orders.forEach(order => {
+        const card = document.getElementById(`order-card-${order.id}`);
+        if (card) {
+          const mins = Math.floor(order.elapsedSeconds / 60);
+          const secs = (order.elapsedSeconds % 60).toString().padStart(2, '0');
+          const timerEl = card.querySelector('.font-mono.text-\\[11px\\] span:last-child');
+          if (timerEl) timerEl.textContent = `${mins}:${secs} min`;
+        }
+      });
+    }, 1000);
+
+    // =========================================================
+    // 10. FUNCIONES DE CONSOLA DE CHATS & COCKPIT OPERATIVO
+    // =========================================================
+    let isMainChatHandoff = false;
+
+    function toggleCustomerDrawer() {
+      const drawer = document.getElementById('customer-drawer');
+      if (!drawer) return;
+      if (drawer.classList.contains('translate-x-full')) {
+        drawer.classList.remove('translate-x-full');
+      } else {
+        drawer.classList.add('translate-x-full');
+      }
+    }
+
+    function insertQuickReply(text) {
+      const input = document.getElementById('main-chat-input');
+      if (!input) return;
+      input.value = text;
+      input.focus();
+    }
+
+    function sendMainChatMessage() {
+      const input = document.getElementById('main-chat-input');
+      const timeline = document.getElementById('main-chat-timeline');
+      if (!input || !timeline) return;
+      const text = input.value.trim();
+      if (!text) return;
+
+      const now = new Date();
+      const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+
+      const msgDiv = document.createElement('div');
+      msgDiv.className = "flex flex-col items-end max-w-[70%] ml-auto";
+      msgDiv.innerHTML = `
+        <div class="bg-slate-900 text-white p-3 rounded-2xl rounded-tr-xs text-xs leading-relaxed shadow-2xs">
+          ${escapeHTML(text)}
+        </div>
+        <span class="text-[10px] font-mono text-ink-secondary mt-1 px-1 flex items-center gap-1">
+          <span>Operador de Cocina</span> • <span>${timeStr}</span>
+        </span>
+      `;
+      timeline.appendChild(msgDiv);
+      timeline.scrollTop = timeline.scrollHeight;
+      input.value = '';
+    }
+
+    function toggleMainChatHandoff() {
+      isMainChatHandoff = !isMainChatHandoff;
+      const dot = document.getElementById('main-chat-bot-dot');
+      const label = document.getElementById('main-chat-bot-label');
+      const btn = document.getElementById('main-chat-handoff-btn');
+      if (!dot || !label || !btn) return;
+
+      if (isMainChatHandoff) {
+        dot.className = "w-2.5 h-2.5 rounded-full bg-ochre";
+        label.textContent = "Control Humano (Tú)";
+        btn.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-300 text-amber-900 font-extrabold text-xs pressable shadow-2xs";
+      } else {
+        dot.className = "w-2.5 h-2.5 rounded-full bg-jade";
+        label.textContent = "Modo IA (Activo)";
+        btn.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 border border-white/90 text-ink-primary font-bold text-xs pressable shadow-2xs";
+      }
+    }
+
+    function selectChatConversation(orderId) {
+      document.querySelectorAll('.chat-list-item').forEach(el => {
+        el.classList.remove('active', 'border-l-4', 'border-l-periwinkle-ink', 'bg-white/90');
+        el.classList.add('bg-white/50');
+      });
+
+      const selectedItem = document.getElementById(`chat-item-${orderId}`);
+      if (selectedItem) {
+        selectedItem.classList.add('active', 'border-l-4', 'border-l-periwinkle-ink', 'bg-white/90');
+        selectedItem.classList.remove('bg-white/50');
+      }
+
+      const order = orders.find(o => o.id === orderId);
+      if (!order) return;
+
+      // Actualizar Barra Superior del Cockpit
+      const initials = order.name.split(' ').map(n => n[0]).join('').substring(0, 2);
+      const avatarEl = document.getElementById('main-chat-avatar');
+      const nameEl = document.getElementById('main-chat-name');
+      const orderEl = document.getElementById('main-chat-order');
+      const stageEl = document.getElementById('main-chat-stage');
+      const paidEl = document.getElementById('main-chat-paid');
+      const detailsEl = document.getElementById('main-chat-details');
+
+      if (avatarEl) avatarEl.textContent = initials;
+      if (nameEl) nameEl.textContent = order.name;
+      if (orderEl) orderEl.textContent = '#' + order.id;
+      if (paidEl) {
+        paidEl.textContent = order.paid ? `Pagado (${order.total})` : `Por Cobrar (${order.total})`;
+        paidEl.className = order.paid 
+          ? "text-xs font-bold px-2 py-0.5 rounded-md bg-emerald-100/80 border border-emerald-300 text-emerald-900"
+          : "text-xs font-bold px-2 py-0.5 rounded-md bg-amber-100/80 border border-amber-300 text-amber-900";
+      }
+      if (detailsEl) {
+        const itemsSummary = order.items.map(i => `${i.qty}x ${i.name}`).join(', ');
+        detailsEl.innerHTML = `<span>${order.address}</span> <span>•</span> <span>${itemsSummary}</span>`;
+      }
+
+      // Actualizar Drawer de Memoria
+      const drawerName = document.getElementById('drawer-client-name');
+      const drawerPhone = document.getElementById('drawer-client-phone');
+      if (drawerName) drawerName.textContent = order.name;
+      if (drawerPhone) drawerPhone.textContent = order.phone;
+
+      // Si es la comanda de Elena Fuentes (11615), cambiar a modo handoff automáticamente
+      if (orderId === '11615' && !isMainChatHandoff) {
+        toggleMainChatHandoff();
+      } else if (orderId !== '11615' && isMainChatHandoff) {
+        toggleMainChatHandoff();
+      }
+      lucide.createIcons();
+    }
+
+    function filterChatList(type) {
+      const items = document.querySelectorAll('.chat-list-item');
+      items.forEach(item => {
+        if (type === 'all') {
+          item.classList.remove('hidden');
+        } else if (type === 'handoff') {
+          if (item.id === 'chat-item-11615') {
+            item.classList.remove('hidden');
+          } else {
+            item.classList.add('hidden');
+          }
+        } else if (type === 'active' || type === 'order') {
+          if (item.id === 'chat-item-11620') {
+            item.classList.add('hidden');
+          } else {
+            item.classList.remove('hidden');
+          }
+        } else if (type === 'bot') {
+          if (item.id === 'chat-item-11615') {
+            item.classList.add('hidden');
+          } else {
+            item.classList.remove('hidden');
+          }
+        }
+      });
+
+      ['all', 'handoff', 'active'].forEach(t => {
+        const tab = document.getElementById(`chat-tab-${t}`);
+        if (tab) {
+          if (t === type) {
+            tab.className = "px-2.5 py-1 rounded-lg bg-white text-ink-primary shadow-2xs font-extrabold";
+          } else {
+            tab.className = "px-2 py-1 rounded-lg hover:bg-white/60 text-ink-secondary";
+          }
+        }
+      });
+    }
+
+    function searchChats(query) {
+      const q = query.toLowerCase().trim();
+      const items = document.querySelectorAll('.chat-list-item');
+      items.forEach(item => {
+        const text = item.innerText.toLowerCase();
+        if (!q || text.includes(q)) {
+          item.classList.remove('hidden');
+        } else {
+          item.classList.add('hidden');
+        }
+      });
+    }
+
+    function escapeHTML(str) {
+      return str.replace(/[&<>'"]/g, 
+        tag => ({
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          "'": '&#39;',
+          '"': '&quot;'
+        }[tag] || tag)
+      );
+    }
+
+    // Generador Procedural de Grano Analógico / Risograph Film Grain
+    // Cero latencia, 100% offline, rendimiento nativo en GPU (tiled pattern)
+    function initFilmGrain() {
+      try {
+        const size = 256;
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+        const imgData = ctx.createImageData(size, size);
+        const buffer = new Uint32Array(imgData.data.buffer);
+        for (let i = 0; i < buffer.length; i++) {
+          const noise = (Math.random() * 255) | 0;
+          const alpha = ((Math.random() * 55) + 20) | 0;
+          buffer[i] = (alpha << 24) | (noise << 16) | (noise << 8) | noise;
+        }
+        ctx.putImageData(imgData, 0, 0);
+        const dataUrl = canvas.toDataURL('image/png');
+        const overlay = document.getElementById('grain-overlay');
+        if (overlay) {
+          overlay.style.backgroundImage = `url(${dataUrl})`;
+          overlay.style.backgroundRepeat = 'repeat';
+        }
+      } catch (e) {
+        console.warn('Film grain init error:', e);
+      }
+    }
+
+    // Inicializar Grano Fílmico Táctil
+    initFilmGrain();
+
+    // Detección inicial de pestaña por URL o Hash
+    const initialTab = new URLSearchParams(window.location.search).get('tab') || window.location.hash.replace('#', '') || 'kds';
+    if (['kds', 'chats', 'customers', 'menu', 'settings'].includes(initialTab)) {
+      switchMainTab(initialTab);
+    } else {
+      renderMatrix();
+    }
+
+    window.addEventListener('hashchange', () => {
+      const hashTab = window.location.hash.replace('#', '');
+      if (['kds', 'chats', 'customers', 'menu', 'settings'].includes(hashTab)) {
+        switchMainTab(hashTab);
+      }
+    });
+  </script>
+</body>
+</html>

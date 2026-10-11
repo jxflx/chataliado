@@ -1,0 +1,22 @@
+{
+  "name": "chataliado-workspace",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "ChatAliado — Multi-Tenant AI Automation Platform for Restaurants & SMEs",
+  "scripts": {
+    "test": "npm --prefix worker test",
+    "worker:dev": "npm --prefix worker run dev",
+    "worker:test": "npm --prefix worker run test",
+    "playground:dev": "node playground/serve.js"
+  },
+  "keywords": [
+    "chataliado",
+    "cloudflare-workers",
+    "whatsapp",
+    "supabase",
+    "llm"
+  ],
+  "author": "ChatAliado Core Team",
+  "license": "UNLICENSED"
+}

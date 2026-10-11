@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-[#FFFFFF]">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChatAliado — KDS Operativo de Alta Densidad (Toast POS Standard)</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', '-apple-system', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            canvas: '#FFFFFF',
+            surface: {
+              subtle: '#F8FAFC',
+              elevated: '#FFFFFF',
+            },
+            ink: {
+              primary: '#0F172A',
+              secondary: '#475569',
+              tertiary: '#94A3B8',
+            },
+            jade: {
+              DEFAULT: '#21B186',
+              hover: '#1B9471',
+              subtle: '#E8F7F2',
+            },
+            periwinkle: {
+              tint: '#DDEEFF',
+              ink: '#1E3A8A',
+            },
+            ochre: {
+              DEFAULT: '#E7B454',
+              subtle: '#FEF7E6',
+            },
+            crimson: {
+              DEFAULT: '#EF4444',
+              subtle: '#FEE2E2',
+            },
+            whisper: 'rgba(226, 232, 240, 0.85)',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: #0F172A;
+      background-color: #FFFFFF;
+      -webkit-font-smoothing: antialiased;
+    }
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .pressable {
+      transition: transform 80ms cubic-bezier(0.32, 0.72, 0, 1), background-color 150ms ease;
+    }
+    .pressable:active {
+      transform: scale(0.98) translateY(1px);
+    }
+    .modal-backdrop {
+      background: rgba(15, 23, 42, 0.45);
+      backdrop-filter: blur(5px);
+    }
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #CBD5E1;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94A3B8;
+    }
+    .ticket-card {
+      transition: all 180ms ease-out;
+    }
+    .ticket-card.bumped {
+      transform: scale(0.92) translateY(8px);
+      opacity: 0;
+    }
+    .item-row {
+      transition: background-color 100ms ease, opacity 100ms ease;
+      cursor: pointer;
+      user-select: none;
+    }
+    .item-row.item-done {
+      opacity: 0.4;
+      text-decoration: line-through;
+    }
+    .item-row.item-done .item-check {
+      background-color: #21B186;
+      border-color: #21B186;
+      color: white;
+    }
+  </style>
+</head>
+<body class="h-full flex overflow-hidden selection:bg-jade-subtle selection:text-jade">
+
+  <!-- ========================================================= -->
+  <!-- 1. BARRA VERTICAL DELGADA (SLIM ICON RAIL - 72px)         -->
+  <!-- ========================================================= -->
+  <aside class="w-[72px] bg-[#F8FAFC] border-r border-whisper flex flex-col items-center justify-between py-4 shrink-0 select-none z-20">
+    <!-- Logo Monograma -->
+    <div class="flex flex-col items-center gap-6">
+      <div class="w-11 h-11 rounded-2xl bg-ink-primary text-white flex items-center justify-center font-extrabold text-sm tracking-tighter shadow-sm" title="ChatAliado KDS">
+        CA
+      </div>
+
+      <!-- Iconos de Navegación Vertical -->
+      <nav class="flex flex-col items-center gap-2">
+        <!-- 1. KDS (Activo) -->
+        <button id="nav-kds" onclick="switchMainTab('kds')" class="w-12 h-12 rounded-2xl bg-periwinkle-tint text-periwinkle-ink flex flex-col items-center justify-center gap-1 pressable relative group" title="Comandas de Cocina (KDS)">
+          <i data-lucide="chef-hat" class="w-5 h-5"></i>
+          <span class="text-[9px] font-bold tracking-tight">KDS</span>
+          <span id="rail-badge-count" class="absolute -top-1 -right-1 font-mono text-[10px] font-bold w-4 h-4 rounded-full bg-crimson text-white flex items-center justify-center border-2 border-white">8</span>
+        </button>
+
+        <!-- 2. Chats -->
+        <button id="nav-chats" onclick="switchMainTab('chats')" class="w-12 h-12 rounded-2xl text-ink-secondary hover:text-ink-primary hover:bg-white border border-transparent hover:border-whisper flex flex-col items-center justify-center gap-1 pressable group relative" title="Monitor de Chats de WhatsApp">
+          <i data-lucide="message-square" class="w-5 h-5"></i>
+          <span class="text-[9px] font-bold tracking-tight">Chats</span>
+          <span class="absolute -top-1 -right-1 font-mono text-[10px] font-bold w-4 h-4 rounded-full bg-ochre text-white flex items-center justify-center border-2 border-white" title="1 requiere atención">1</span>
+        </button>
+
+        <!-- 3. Clientes -->
+        <button id="nav-customers" onclick="switchMainTab('customers')" class="w-12 h-12 rounded-2xl text-ink-secondary hover:text-ink-primary hover:bg-white border border-transparent hover:border-whisper flex flex-col items-center justify-center gap-1 pressable group" title="Clientes & Memoria">
+          <i data-lucide="users" class="w-5 h-5"></i>
+          <span class="text-[9px] font-bold tracking-tight">Clientes</span>
+        </button>
+
+        <!-- 4. Menú -->
+        <button id="nav-menu" onclick="switchMainTab('menu')" class="w-12 h-12 rounded-2xl text-ink-secondary hover:text-ink-primary hover:bg-white border border-transparent hover:border-whisper flex flex-col items-center justify-center gap-1 pressable group" title="Menú & Catálogo">
+          <i data-lucide="utensils" class="w-5 h-5"></i>
+          <span class="text-[9px] font-bold tracking-tight">Menú</span>
+        </button>
+
+        <!-- 5. Ajustes -->
+        <button id="nav-settings" onclick="switchMainTab('settings')" class="w-12 h-12 rounded-2xl text-ink-secondary hover:text-ink-primary hover:bg-white border border-transparent hover:border-whisper flex flex-col items-center justify-center gap-1 pressable group" title="Configuraciones">
+          <i data-lucide="sliders-horizontal" class="w-5 h-5"></i>
+          <span class="text-[9px] font-bold tracking-tight">Ajustes</span>
+        </button>
+      </nav>
+    </div>
+
+    <!-- Base del Rail: Conexión & Avatar -->
+    <div class="flex flex-col items-center gap-4">
+      <div class="w-3 h-3 rounded-full bg-jade ring-4 ring-jade-subtle animate-pulse" title="WhatsApp Bot Conectado en Tiempo Real"></div>
+      <div class="w-10 h-10 rounded-2xl bg-slate-200 border border-whisper flex items-center justify-center font-bold text-xs text-ink-primary" title="Operador: Cocina Principal">
+        CP
+      </div>
+    </div>
+  </aside>
+
+  <!-- ========================================================= -->
+  <!-- 2. ÁREA DE TRABAJO PRINCIPAL                              -->
+  <!-- ========================================================= -->
+  <div class="flex-1 flex flex-col min-w-0 bg-white">
+
+    <!-- CABECERA OPERATIVA KDS -->
+    <header class="h-16 px-5 border-b border-whisper flex items-center justify-between bg-white shrink-0">
+      <div class="flex items-center gap-3">
+        <h1 id="page-title" class="text-lg font-extrabold text-ink-primary tracking-tight flex items-center gap-2.5">
+          <span>KDS Cocina</span>
+          <span id="active-orders-pill" class="text-xs font-mono font-bold text-crimson px-2.5 py-0.5 rounded-full bg-crimson-subtle border border-red-200">8 en Cola</span>
+        </h1>
+
+        <div class="h-5 w-px bg-slate-200"></div>
+
+        <!-- SELECTOR DE VISTA: TOAST POS MATRIZ vs KANBAN -->
+        <div class="flex items-center bg-slate-100 p-1 rounded-xl border border-whisper text-xs font-bold text-ink-secondary">
+          <button id="btn-view-matrix" onclick="setViewMode('matrix')" class="px-3 py-1 rounded-lg bg-white text-ink-primary shadow-xs flex items-center gap-1.5 transition-all">
+            <i data-lucide="grid-2x2" class="w-3.5 h-3.5 text-jade"></i>
+            <span>Matriz Toast KDS (Alta Densidad)</span>
+          </button>
+          <button id="btn-view-kanban" onclick="setViewMode('kanban')" class="px-3 py-1 rounded-lg hover:text-ink-primary flex items-center gap-1.5 transition-all">
+            <i data-lucide="columns-3" class="w-3.5 h-3.5"></i>
+            <span>Columnas Kanban</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- HERRAMIENTAS Y CONTROLES OPERATIVOS -->
+      <div class="flex items-center gap-2.5">
+        <!-- Selector de Columnas (Densidad 2x4 vs 2x5) -->
+        <div id="grid-cols-selector" class="flex items-center bg-slate-100 p-0.5 rounded-xl border border-whisper text-xs font-bold text-ink-secondary">
+          <button onclick="setGridColumns(4)" id="btn-col-4" class="px-2.5 py-1 rounded-lg bg-white text-ink-primary shadow-xs font-mono">4 cols (2x4)</button>
+          <button onclick="setGridColumns(5)" id="btn-col-5" class="px-2.5 py-1 rounded-lg hover:text-ink-primary font-mono">5 cols (2x5)</button>
+        </div>
+
+        <!-- Filtro Rápido por Canal -->
+        <div class="flex items-center bg-slate-100 p-0.5 rounded-xl border border-whisper text-xs font-semibold text-ink-secondary">
+          <button onclick="filterChannel('all')" class="channel-btn active px-2.5 py-1 rounded-lg bg-white text-ink-primary shadow-xs font-bold">Todos</button>
+          <button onclick="filterChannel('Domicilio')" class="channel-btn px-2 py-1 rounded-lg hover:text-ink-primary">🛵</button>
+          <button onclick="filterChannel('Mesa')" class="channel-btn px-2 py-1 rounded-lg hover:text-ink-primary">🍽️</button>
+          <button onclick="filterChannel('Llevar')" class="channel-btn px-2 py-1 rounded-lg hover:text-ink-primary">🛍️</button>
+        </div>
+
+        <div class="h-5 w-px bg-slate-200"></div>
+
+        <!-- Botón Rollback / Comparador de Estilo Liquid Glass -->
+        <a href="glass.html" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200/70 border border-whisper text-xs font-bold text-ink-secondary flex items-center gap-1.5 pressable" title="Ver versión con Liquid Glass">
+          <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-500"></i>
+          <span>Liquid Glass</span>
+        </a>
+
+        <!-- Alerta Sonora -->
+        <button onclick="toggleAudio(this)" class="p-2 rounded-xl border border-whisper hover:bg-slate-50 text-ink-secondary pressable" title="Sonido de Comandas Activado">
+          <i data-lucide="volume-2" class="w-4 h-4 text-jade" id="audio-icon"></i>
+        </button>
+
+        <!-- Pantalla Completa (Ideal para Tablet / TV de Cocina) -->
+        <button onclick="toggleFullScreen()" class="p-2 rounded-xl border border-whisper hover:bg-slate-50 text-ink-secondary pressable" title="Modo Pantalla Completa">
+          <i data-lucide="maximize" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- ========================================================= -->
+    <!-- 3A. VISTA PRINCIPAL: MATRIZ TOAST KDS (ALTA DENSIDAD)     -->
+    <!-- ========================================================= -->
+    <main id="section-matrix" class="flex-1 flex flex-col min-h-0 bg-[#F8FAFC]">
+      <!-- Contenedor con Scroll de Matriz -->
+      <div class="flex-1 p-3.5 overflow-y-auto min-h-0">
+        <div id="matrix-grid" class="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <!-- Renderizado dinámico vía JavaScript -->
+        </div>
+      </div>
+
+      <!-- ========================================================= -->
+      <!-- BARRA INFERIOR TOAST POS: "ALL DAY" TOTALES DE PRODUCCIÓN -->
+      <!-- ========================================================= -->
+      <footer class="h-14 px-5 bg-white border-t border-whisper flex items-center justify-between shrink-0 shadow-xs select-none">
+        <div class="flex items-center gap-3 overflow-x-auto py-1 text-xs">
+          <div class="flex items-center gap-1.5 font-extrabold text-ink-primary shrink-0 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200">
+            <i data-lucide="flame" class="w-4 h-4 text-amber-500"></i>
+            <span>ALL DAY EN FUEGO:</span>
+          </div>
+          <!-- Totales agrupados en vivo -->
+          <div id="all-day-summary" class="flex items-center gap-2">
+            <!-- Renderizado dinámico -->
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3 shrink-0 pl-3">
+          <!-- Botón RECALL (Deshacer último despacho accidental) -->
+          <button id="recall-btn" onclick="recallLastOrder()" disabled class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-whisper bg-slate-50 text-ink-tertiary text-xs font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed pressable">
+            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+            <span id="recall-text">Deshacer (Recall)</span>
+          </button>
+        </div>
+      </footer>
+    </main>
+
+    <!-- ========================================================= -->
+    <!-- 3B. VISTA ALTERNATIVA: COLUMNAS KANBAN (3 COLUMNAS)        -->
+    <!-- ========================================================= -->
+    <div id="section-kanban" class="hidden flex-1 p-5 overflow-x-auto bg-[#F8FAFC]">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5 min-w-[960px] h-full">
+        <!-- Columna 1: Nuevas -->
+        <div class="flex flex-col bg-slate-100/80 rounded-2xl border border-whisper p-3.5">
+          <div class="flex items-center justify-between pb-2.5 border-b border-whisper mb-3">
+            <div class="flex items-center gap-2 font-extrabold text-sm text-ink-primary">
+              <span class="w-2.5 h-2.5 rounded-full bg-crimson"></span>
+              <span>1. Nuevas Órdenes</span>
+            </div>
+            <span id="kanban-count-new" class="font-mono text-xs font-bold px-2 py-0.5 rounded-full bg-crimson-subtle text-crimson">0</span>
+          </div>
+          <div id="kanban-col-new" class="space-y-3 flex-1 overflow-y-auto pr-1"></div>
+        </div>
+
+        <!-- Columna 2: En Preparación -->
+        <div class="flex flex-col bg-slate-100/80 rounded-2xl border border-whisper p-3.5">
+          <div class="flex items-center justify-between pb-2.5 border-b border-whisper mb-3">
+            <div class="flex items-center gap-2 font-extrabold text-sm text-ink-primary">
+              <span class="w-2.5 h-2.5 rounded-full bg-ochre"></span>
+              <span>2. En Preparación</span>
+            </div>
+            <span id="kanban-count-prep" class="font-mono text-xs font-bold px-2 py-0.5 rounded-full bg-ochre-subtle text-ochre">0</span>
+          </div>
+          <div id="kanban-col-prep" class="space-y-3 flex-1 overflow-y-auto pr-1"></div>
+        </div>
+
+        <!-- Columna 3: Listas para Entrega -->
+        <div class="flex flex-col bg-slate-100/80 rounded-2xl border border-whisper p-3.5">
+          <div class="flex items-center justify-between pb-2.5 border-b border-whisper mb-3">
+            <div class="flex items-center gap-2 font-extrabold text-sm text-ink-primary">
+              <span class="w-2.5 h-2.5 rounded-full bg-jade"></span>
+              <span>3. Listas para Entrega</span>
+            </div>
+            <span id="kanban-count-ready" class="font-mono text-xs font-bold px-2 py-0.5 rounded-full bg-jade-subtle text-jade">0</span>
+          </div>
+          <div id="kanban-col-ready" class="space-y-3 flex-1 overflow-y-auto pr-1"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- 4. MONITOR DE CHATS WHATSAPP                              -->
+    <!-- ========================================================= -->
+    <div id="section-chats" class="hidden flex-1 p-6 bg-[#F8FAFC]">
+      <div class="h-full bg-white rounded-3xl border border-whisper shadow-sm flex overflow-hidden">
+        <!-- Lista de Chats -->
+        <div class="w-80 border-r border-whisper flex flex-col bg-[#F8FAFC]/50">
+          <div class="p-4 border-b border-whisper space-y-3">
+            <div class="relative">
+              <i data-lucide="search" class="w-4 h-4 text-ink-tertiary absolute left-3 top-2.5"></i>
+              <input type="text" placeholder="Buscar cliente..." class="w-full pl-9 pr-3 py-2 bg-white border border-whisper rounded-xl text-xs font-medium text-ink-primary focus:outline-none focus:ring-2 focus:ring-jade/40">
+            </div>
+            <div class="flex gap-1.5 text-xs font-bold">
+              <span class="px-3 py-1 rounded-lg bg-periwinkle-tint text-periwinkle-ink">Todos (8)</span>
+              <span class="px-3 py-1 rounded-lg bg-white border border-whisper text-ink-secondary hover:text-ink-primary">IA</span>
+              <span class="px-3 py-1 rounded-lg bg-ochre-subtle text-ochre border border-amber-200">Humano (1)</span>
+            </div>
+          </div>
+          <div class="flex-1 overflow-y-auto divide-y divide-slate-100">
+            <div class="p-4 bg-periwinkle-tint/60 border-l-4 border-periwinkle-ink cursor-pointer flex gap-3">
+              <div class="w-10 h-10 rounded-2xl bg-white border border-slate-200 font-extrabold text-xs flex items-center justify-center text-ink-primary shrink-0">SM</div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center justify-between">
+                  <span class="font-extrabold text-sm text-ink-primary truncate">Sarah Martínez</span>
+                  <span class="font-mono text-xs text-ink-secondary">14:20</span>
+                </div>
+                <p class="text-xs text-ink-secondary truncate mt-1">Quiero pepperoni con orilla rellena...</p>
+                <div class="flex items-center gap-2 mt-2">
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-jade-subtle text-jade">🤖 Bot Atendiendo</span>
+                  <span class="text-[10px] font-mono text-ink-tertiary">#11613</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Conversación Abierta -->
+        <div class="flex-1 flex flex-col justify-between bg-white">
+          <div class="h-16 px-6 border-b border-whisper flex items-center justify-between bg-white">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-2xl bg-slate-100 font-extrabold text-xs flex items-center justify-center text-ink-primary">SM</div>
+              <div>
+                <div class="font-extrabold text-sm text-ink-primary">Sarah Martínez</div>
+                <div class="text-xs font-mono text-ink-secondary">+52 55 4920 1192 • Pedido #11613</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="px-3 py-1 rounded-xl bg-jade-subtle text-jade text-xs font-extrabold flex items-center gap-1.5">
+                <i data-lucide="bot" class="w-4 h-4"></i>
+                <span>Modo IA Activo</span>
+              </span>
+              <button onclick="toggleHandoff(this)" class="px-3.5 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-100 text-ink-primary text-xs font-bold pressable">
+                ✋ Tomar Control
+              </button>
+            </div>
+          </div>
+
+          <div class="flex-1 p-6 overflow-y-auto space-y-4 bg-slate-50/40">
+            <div class="flex flex-col items-start max-w-[75%]">
+              <div class="bg-periwinkle-tint p-4 rounded-2xl rounded-tl-xs text-sm text-ink-primary leading-relaxed shadow-xs">
+                Hola, quiero ordenar para entrega por favor.
+              </div>
+              <span class="text-xs font-mono text-ink-tertiary mt-1 px-1">14:19</span>
+            </div>
+            <div class="flex flex-col items-end max-w-[75%] ml-auto">
+              <div class="bg-white border border-whisper p-4 rounded-2xl rounded-tr-xs text-sm text-ink-primary leading-relaxed shadow-xs">
+                ¡Hola Sarah! 🍕 Con gusto. Tengo registrada tu entrega en <b>Av. Revolución 340, Depto 4B</b>. ¿Confirmamos a esa dirección?
+              </div>
+              <span class="text-xs font-mono text-ink-secondary mt-1 px-1 flex items-center gap-1">
+                <span>🤖 ChatAliado</span> • <span>14:20</span>
+              </span>
+            </div>
+          </div>
+
+          <div class="p-4 border-t border-whisper bg-white flex gap-3">
+            <input type="text" placeholder="Escribe para responder directo a WhatsApp..." class="flex-1 px-4 py-2.5 bg-slate-50 border border-whisper rounded-xl text-xs text-ink-primary focus:outline-none focus:ring-2 focus:ring-jade/40">
+            <button class="px-5 py-2.5 bg-jade hover:bg-jade-hover text-white text-xs font-bold rounded-xl pressable flex items-center gap-2 shadow-xs">
+              <i data-lucide="send" class="w-4 h-4"></i>
+              <span>Enviar</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Ficha Cliente -->
+        <div class="w-72 border-l border-whisper p-5 bg-[#F8FAFC] space-y-4">
+          <div class="text-xs font-extrabold text-ink-primary uppercase tracking-wider">Ficha de Cliente</div>
+          <div class="bg-white p-4 rounded-2xl border border-whisper space-y-2 text-xs">
+            <div class="font-extrabold text-sm text-ink-primary">Sarah Martínez</div>
+            <div class="font-mono text-ink-secondary">+52 55 4920 1192</div>
+            <div class="text-ink-secondary font-medium">14 pedidos completados</div>
+          </div>
+          <div class="space-y-2">
+            <div class="text-xs font-extrabold text-ink-primary flex items-center gap-1.5">
+              <i data-lucide="file-text" class="w-4 h-4 text-jade"></i>
+              <span>Bloc del Mesero (notes_md)</span>
+            </div>
+            <div class="bg-white p-3.5 rounded-2xl border border-whisper text-xs leading-relaxed text-ink-primary font-mono space-y-1.5">
+              <div>📍 <b>Entrega:</b> Av. Revolución 340, 4B</div>
+              <div>⚠️ <b>Alergias:</b> Sin cebolla</div>
+              <div>🍕 <b>Gusto:</b> Orilla rellena siempre</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. MENÚ & CONFIGURACIONES -->
+    <div id="section-menu" class="hidden flex-1 p-8 bg-[#F8FAFC]">
+      <div class="max-w-4xl mx-auto bg-white p-6 rounded-3xl border border-whisper space-y-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-lg font-extrabold text-ink-primary">Catálogo de Platillos & Modificadores</h2>
+            <p class="text-xs text-ink-secondary">Pausa platillos agotados al instante para que el bot no los ofrezca.</p>
+          </div>
+          <button class="px-4 py-2 bg-jade text-white text-xs font-bold rounded-xl pressable flex items-center gap-2 shadow-xs">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            <span>Nuevo Platillo</span>
+          </button>
+        </div>
+        <div class="divide-y divide-slate-100 text-xs">
+          <div class="py-3 flex items-center justify-between">
+            <div>
+              <div class="font-bold text-sm text-ink-primary">Pizza Pepperoni Clásica</div>
+              <div class="text-ink-secondary">Familiar ($260), Mediana ($210)</div>
+            </div>
+            <span class="px-2.5 py-1 rounded-lg bg-jade-subtle text-jade font-bold text-xs">Disponible</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- 6. MODAL EMERGENTE RÁPIDO: "VER CHAT DE LA COMANDA"       -->
+  <!-- ========================================================= -->
+  <div id="chat-modal" class="fixed inset-0 z-50 modal-backdrop hidden items-center justify-center p-4">
+    <div class="bg-white w-full max-w-xl rounded-3xl border border-whisper shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+      
+      <div class="h-16 px-6 border-b border-whisper flex items-center justify-between bg-slate-50">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-periwinkle-tint font-extrabold text-sm flex items-center justify-center text-periwinkle-ink" id="modal-avatar">
+            SM
+          </div>
+          <div>
+            <div class="text-sm font-extrabold text-ink-primary flex items-center gap-2">
+              <span id="modal-name">Sarah Martínez</span>
+              <span class="font-mono text-xs font-bold px-2 py-0.5 rounded-md bg-white border border-whisper text-ink-secondary" id="modal-order">#11613</span>
+            </div>
+            <div class="text-xs font-mono text-ink-secondary" id="modal-phone">+52 55 4920 1192</div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button id="modal-handoff-btn" onclick="toggleModalHandoff()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 border border-whisper text-ink-primary font-bold text-xs pressable shadow-xs">
+            <span class="w-2.5 h-2.5 rounded-full bg-jade" id="modal-bot-dot"></span>
+            <span id="modal-bot-status">Modo IA (Activo)</span>
+          </button>
+          <button onclick="closeChatModal()" class="p-2 rounded-xl text-ink-tertiary hover:text-ink-primary hover:bg-slate-200/50 pressable">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="p-6 overflow-y-auto max-h-[360px] space-y-3 bg-[#F8FAFC] text-xs">
+        <div class="flex flex-col items-start max-w-[85%]">
+          <div class="bg-periwinkle-tint p-3 rounded-2xl rounded-tl-xs text-sm text-ink-primary leading-relaxed shadow-xs">
+            Hola, quiero una pizza familiar de pepperoni por favor con orilla rellena.
+          </div>
+          <span class="text-[11px] font-mono text-ink-tertiary mt-1 px-1">14:19</span>
+        </div>
+
+        <div class="flex flex-col items-end max-w-[85%] ml-auto">
+          <div class="bg-white border border-whisper p-3 rounded-2xl rounded-tr-xs text-sm text-ink-primary leading-relaxed shadow-xs">
+            ¡Hola! Con gusto. Confirmamos entrega en <b id="modal-chat-address">Av. Revolución 340</b>. ¿Correcto?
+          </div>
+          <span class="text-[11px] font-mono text-ink-secondary mt-1 px-1 flex items-center gap-1">
+            <span>🤖 ChatAliado</span> • <span>14:20</span>
+          </span>
+        </div>
+
+        <div class="flex flex-col items-start max-w-[85%]">
+          <div class="bg-periwinkle-tint p-3 rounded-2xl rounded-tl-xs text-sm text-ink-primary leading-relaxed shadow-xs">
+            Sí porfa, y 2 cocas de 600 bien frías. Pago con $500 en efectivo al repartidor.
+          </div>
+          <span class="text-[11px] font-mono text-ink-tertiary mt-1 px-1">14:20</span>
+        </div>
+
+        <div class="bg-white p-3 rounded-xl border border-whisper text-xs space-y-1 font-mono text-ink-secondary">
+          <div class="font-bold text-ink-primary">📦 Pedido confirmado automáticamente:</div>
+          <div id="modal-order-summary-items">• 1x Pizza Pepperoni Familiar ($260)<br>• 2x Refresco Coca-Cola ($70)</div>
+          <div class="font-bold text-ink-primary pt-1 border-t border-slate-100" id="modal-order-total">Total: $330 MXN (Efectivo)</div>
+        </div>
+      </div>
+
+      <div class="p-4 bg-white border-t border-whisper flex items-center justify-between gap-3">
+        <button onclick="switchMainTab('chats'); closeChatModal();" class="text-xs font-bold text-periwinkle-ink hover:underline flex items-center gap-1.5 pressable shrink-0">
+          <span>Ir al Monitor Completo</span>
+          <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+        </button>
+
+        <div class="flex-1 flex gap-2">
+          <input type="text" placeholder="Escribir mensaje directo a WhatsApp..." class="flex-1 px-3.5 py-2 bg-slate-50 border border-whisper rounded-xl text-xs text-ink-primary focus:outline-none focus:ring-2 focus:ring-jade/40">
+          <button class="px-4 py-2 bg-jade hover:bg-jade-hover text-white text-xs font-bold rounded-xl pressable flex items-center gap-1.5 shadow-xs">
+            <i data-lucide="send" class="w-4 h-4"></i>
+            <span>Enviar</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- 7. MOTOR JAVASCRIPT: GESTIÓN DE MATRIZ KDS & ALL-DAY      -->
+  <!-- ========================================================= -->
+  <script>
+    // ESTADO GLOBAL DE COMANDAS ACTIVAS
+    let orders = [
+      {
+        id: '11613',
+        name: 'Sarah Martínez',
+        phone: '+52 55 4920 1192',
+        channel: 'Domicilio',
+        channelIcon: 'bike',
+        channelBadge: '🛵 Domicilio',
+        address: 'Av. Revolución 340, Depto 4B',
+        elapsedSeconds: 1120, // 18:40 min
+        paid: true,
+        total: '$330',
+        stage: 'new', // new, prep, ready
+        notes: '⚠️ Sin cebolla en la salsa',
+        items: [
+          { id: '11613-1', qty: 1, name: 'Pizza Pepperoni Familiar', mod: 'Orilla Rellena de Queso', done: false },
+          { id: '11613-2', qty: 2, name: 'Coca-Cola 600ml', mod: 'Bien fríos de refrigerador', done: true }
+        ]
+      },
+      {
+        id: '11614',
+        name: 'Carlos Robles',
+        phone: '+52 55 8392 0012',
+        channel: 'Mesa',
+        channelIcon: 'utensils',
+        channelBadge: '🍽️ Mesa 2',
+        address: 'Comedor Interior',
+        elapsedSeconds: 735, // 12:15 min
+        paid: true,
+        total: '$210',
+        stage: 'prep',
+        notes: '',
+        items: [
+          { id: '11614-1', qty: 1, name: 'Hamburguesa Doble Queso', mod: 'Con papas sazonadas', done: false },
+          { id: '11614-2', qty: 1, name: 'Cerveza Corona 355ml', mod: 'Con limón y sal', done: false }
+        ]
+      },
+      {
+        id: '11615',
+        name: 'Elena Fuentes',
+        phone: '+52 55 1092 8841',
+        channel: 'Llevar',
+        channelIcon: 'shopping-bag',
+        channelBadge: '🛍️ Llevar',
+        address: 'Pasa a mostrador',
+        elapsedSeconds: 460, // 07:40 min
+        paid: false,
+        total: '$285',
+        stage: 'new',
+        notes: '',
+        items: [
+          { id: '11615-1', qty: 1, name: 'Pizza Cuatro Quesos Med.', mod: 'Masa delgada crujiente', done: false },
+          { id: '11615-2', qty: 1, name: 'Alitas BBQ (8pz)', mod: 'Aderezo ranch extra', done: false }
+        ]
+      },
+      {
+        id: '11616',
+        name: 'Miguel Ángel R.',
+        phone: '+52 55 7765 4321',
+        channel: 'Domicilio',
+        channelIcon: 'bike',
+        channelBadge: '🛵 Domicilio',
+        address: 'Calle Juárez 45, Col. Centro',
+        elapsedSeconds: 310, // 05:10 min
+        paid: true,
+        total: '$390',
+        stage: 'prep',
+        notes: 'Timbre descompuesto, tocar fuerte',
+        items: [
+          { id: '11616-1', qty: 2, name: 'Pizza Hawaiana Grande', mod: 'Extra piña', done: false },
+          { id: '11616-2', qty: 1, name: 'Papas Francesas Gdes.', mod: 'Con queso cheddar', done: false }
+        ]
+      },
+      {
+        id: '11617',
+        name: 'Valeria Gómez',
+        phone: '+52 55 3344 5566',
+        channel: 'Mesa',
+        channelIcon: 'utensils',
+        channelBadge: '🍽️ Mesa 5',
+        address: 'Terraza exterior',
+        elapsedSeconds: 245, // 04:05 min
+        paid: true,
+        total: '$175',
+        stage: 'prep',
+        notes: '',
+        items: [
+          { id: '11617-1', qty: 1, name: 'Pizza Vegetariana Med.', mod: 'Sin champiñones', done: false },
+          { id: '11617-2', qty: 1, name: 'Agua de Jamaica 500ml', mod: 'Poco dulce', done: false }
+        ]
+      },
+      {
+        id: '11618',
+        name: 'Fernando Luna',
+        phone: '+52 55 9988 7711',
+        channel: 'Domicilio',
+        channelIcon: 'bike',
+        channelBadge: '🛵 Domicilio',
+        address: 'Av. Insurgentes Sur 1200',
+        elapsedSeconds: 192, // 03:12 min
+        paid: false,
+        total: '$420',
+        stage: 'new',
+        notes: '',
+        items: [
+          { id: '11618-1', qty: 1, name: 'Pizza Carnes Frías Fam.', mod: 'Salsa chipotle suave', done: false },
+          { id: '11618-2', qty: 1, name: 'Dedos de Queso (6pz)', mod: 'Salsa marinara', done: false },
+          { id: '11618-3', qty: 1, name: 'Sprite 600ml', mod: '', done: false }
+        ]
+      },
+      {
+        id: '11619',
+        name: 'Lucía Méndez',
+        phone: '+52 55 2233 4455',
+        channel: 'Mesa',
+        channelIcon: 'utensils',
+        channelBadge: '🍽️ Mesa 1',
+        address: 'Comedor Principal',
+        elapsedSeconds: 110, // 01:50 min
+        paid: true,
+        total: '$160',
+        stage: 'new',
+        notes: '',
+        items: [
+          { id: '11619-1', qty: 1, name: 'Pizza Pepperoni Med.', mod: 'Tradicional', done: false },
+          { id: '11619-2', qty: 1, name: 'Agua Mineral 500ml', mod: '', done: false }
+        ]
+      },
+      {
+        id: '11620',
+        name: 'Rodrigo Vega',
+        phone: '+52 55 6677 8899',
+        channel: 'WhatsApp',
+        channelIcon: 'bot',
+        channelBadge: '🤖 WhatsApp',
+        address: 'En conversación por bot...',
+        elapsedSeconds: 45, // 00:45 min
+        paid: false,
+        total: '$290',
+        isPreview: true, // Toast POS Preview Ticket!
+        stage: 'new',
+        notes: 'En proceso de confirmación',
+        items: [
+          { id: '11620-1', qty: 1, name: 'Pizza Mexicana Grande', mod: 'Jalapeño y chorizo', done: false },
+          { id: '11620-2', qty: 1, name: 'Fanta 600ml', mod: '', done: false }
+        ]
+      }
+    ];
+
+    // COLA DE RECALL (DESHACER DESPACHO)
+    let recallStack = [];
+    let currentViewMode = 'matrix'; // 'matrix' o 'kanban'
+    let currentGridCols = 4; // 4 columnas (2x4) o 5 columnas (2x5)
+    let currentFilterChannel = 'all';
+
+    // RENDERIZADO DE LA MATRIZ KDS (ALTA DENSIDAD TOAST POS)
+    function renderMatrix() {
+      const grid = document.getElementById('matrix-grid');
+      grid.innerHTML = '';
+
+      // Aplicar clases de columnas dinámicamente
+      if (currentGridCols === 5) {
+        grid.className = "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3";
+      } else {
+        grid.className = "grid grid-cols-2 md:grid-cols-4 gap-3";
+      }
+
+      const filteredOrders = orders.filter(o => {
+        if (currentFilterChannel === 'all') return true;
+        return o.channel === currentFilterChannel;
+      });
+
+      // Actualizar conteos en cabecera
+      document.getElementById('active-orders-pill').textContent = `${orders.length} en Cola`;
+      document.getElementById('rail-badge-count').textContent = orders.length;
+
+      filteredOrders.forEach((order, index) => {
+        const isUrgent = order.elapsedSeconds > 900; // >15 min
+        const isWarning = order.elapsedSeconds > 480 && !isUrgent; // >8 min
+
+        let headerBg = 'bg-slate-100 border-slate-200';
+        let timerColor = 'text-ink-secondary bg-white';
+        let borderCard = 'border-whisper';
+
+        if (order.isPreview) {
+          headerBg = 'bg-slate-50 border-dashed border-slate-300';
+          borderCard = 'border-dashed border-slate-300 bg-slate-50/50';
+        } else if (isUrgent) {
+          headerBg = 'bg-crimson-subtle border-red-200';
+          timerColor = 'text-crimson bg-white font-extrabold border border-red-200';
+          borderCard = 'border-red-300 ring-1 ring-red-200';
+        } else if (isWarning) {
+          headerBg = 'bg-ochre-subtle border-amber-200';
+          timerColor = 'text-ochre bg-white font-extrabold border border-amber-200';
+          borderCard = 'border-amber-300';
+        }
+
+        const mins = Math.floor(order.elapsedSeconds / 60);
+        const secs = (order.elapsedSeconds % 60).toString().padStart(2, '0');
+        const timerText = `${mins}:${secs} min`;
+
+        const card = document.createElement('div');
+        card.id = `order-card-${order.id}`;
+        card.className = `ticket-card bg-white rounded-2xl border ${borderCard} shadow-xs flex flex-col justify-between overflow-hidden text-xs relative select-none`;
+
+        // Cabecera del Ticket
+        let headerHTML = `
+          <div class="px-3 py-2 ${headerBg} border-b flex items-center justify-between">
+            <div class="flex items-center gap-1.5 min-w-0">
+              <span class="font-mono font-extrabold text-sm text-ink-primary shrink-0">#${order.id}</span>
+              <span class="font-bold text-xs text-ink-primary truncate">${order.name.split(' ')[0]}</span>
+            </div>
+            <div class="flex items-center gap-1 shrink-0">
+              <span class="font-mono text-[11px] px-1.5 py-0.5 rounded-md ${timerColor} flex items-center gap-1">
+                <i data-lucide="clock" class="w-3 h-3 ${isUrgent ? 'animate-spin' : ''}"></i>
+                <span>${timerText}</span>
+              </span>
+            </div>
+          </div>
+        `;
+
+        // Sub-barra: Canal, Pago & Botón Chat
+        let subBarHTML = `
+          <div class="px-3 py-1.5 bg-slate-50/60 border-b border-slate-100 flex items-center justify-between text-[11px]">
+            <div class="flex items-center gap-1.5 truncate">
+              <span class="font-semibold text-ink-secondary">${order.channelBadge}</span>
+              ${order.paid 
+                ? `<span class="px-1.5 py-0.2 rounded font-bold text-[10px] bg-jade-subtle text-jade">✔ PAGADO</span>` 
+                : `<span class="px-1.5 py-0.2 rounded font-bold text-[10px] bg-crimson-subtle text-crimson">⏳ COBRAR</span>`}
+            </div>
+            <button onclick="openChatModal('${order.name}', '${order.phone}', '${order.id}')" class="px-2 py-0.5 rounded-lg bg-periwinkle-tint hover:bg-blue-200 text-periwinkle-ink font-bold text-[10px] pressable flex items-center gap-1 shrink-0 shadow-2xs" title="Ver conversación de WhatsApp">
+              <i data-lucide="message-circle" class="w-3 h-3"></i>
+              <span>Chat</span>
+            </button>
+          </div>
+        `;
+
+        // Si es preview ticket
+        if (order.isPreview) {
+          subBarHTML = `
+            <div class="px-3 py-1.5 bg-amber-50 border-b border-amber-200 flex items-center justify-between text-[10px] text-amber-800 font-bold">
+              <span class="flex items-center gap-1">
+                <i data-lucide="bot" class="w-3 h-3 text-amber-600"></i>
+                <span>PREVIEW: Cliente armando pedido</span>
+              </span>
+              <button onclick="openChatModal('${order.name}', '${order.phone}', '${order.id}')" class="px-1.5 py-0.5 rounded bg-white border border-amber-300 text-amber-900 font-bold text-[9px] pressable">
+                Ver
+              </button>
+            </div>
+          `;
+        }
+
+        // Lista de Ítems (con tachado interactivo individual)
+        let itemsHTML = `<div class="p-3 space-y-2 flex-1 overflow-y-auto max-h-[220px]">`;
+        order.items.forEach((item, itemIdx) => {
+          itemsHTML += `
+            <div onclick="toggleItemDone('${order.id}', ${itemIdx})" class="item-row ${item.done ? 'item-done' : ''} p-1.5 rounded-xl hover:bg-slate-50 border border-transparent hover:border-slate-200 flex items-start gap-2">
+              <span class="item-check w-4 h-4 rounded-md border border-slate-300 flex items-center justify-center shrink-0 mt-0.5 text-[10px] font-bold">
+                ${item.done ? '✓' : ''}
+              </span>
+              <div class="flex-1 min-w-0">
+                <div class="font-extrabold text-xs text-ink-primary flex justify-between leading-snug">
+                  <span>${item.qty}x ${item.name}</span>
+                </div>
+                ${item.mod ? `<div class="text-[11px] text-ink-secondary font-medium">• ${item.mod}</div>` : ''}
+              </div>
+            </div>
+          `;
+        });
+
+        if (order.notes) {
+          itemsHTML += `
+            <div class="mt-1.5 p-1.5 rounded-lg bg-red-50 border border-red-200 text-crimson font-bold text-[11px] flex items-center gap-1.5">
+              <i data-lucide="alert-triangle" class="w-3.5 h-3.5 shrink-0"></i>
+              <span class="truncate">${order.notes}</span>
+            </div>
+          `;
+        }
+        itemsHTML += `</div>`;
+
+        // Footer del Ticket: Total y Botón Despachar (Bump)
+        let footerHTML = `
+          <div class="p-2.5 bg-slate-50 border-t border-whisper flex items-center justify-between gap-2">
+            <span class="font-mono font-bold text-xs text-ink-secondary">${order.total}</span>
+            <button onclick="bumpOrder('${order.id}')" class="flex-1 py-1.5 px-3 rounded-xl bg-ink-primary hover:bg-slate-800 text-white font-extrabold text-xs tracking-tight flex items-center justify-center gap-1.5 pressable shadow-2xs">
+              <i data-lucide="check" class="w-3.5 h-3.5 text-jade"></i>
+              <span>Despachar (Bump)</span>
+            </button>
+          </div>
+        `;
+
+        if (order.isPreview) {
+          footerHTML = `
+            <div class="p-2.5 bg-slate-100 border-t border-whisper flex items-center justify-between text-[11px] text-ink-tertiary">
+              <span>Esperando confirmación...</span>
+              <span class="font-mono font-bold">${order.total}</span>
+            </div>
+          `;
+        }
+
+        card.innerHTML = headerHTML + subBarHTML + itemsHTML + footerHTML;
+        grid.appendChild(card);
+      });
+
+      updateAllDaySummary();
+      lucide.createIcons();
+    }
+
+    // TACHADO INTERACTIVO DE ÍTEM
+    function toggleItemDone(orderId, itemIndex) {
+      const order = orders.find(o => o.id === orderId);
+      if (!order) return;
+      order.items[itemIndex].done = !order.items[itemIndex].done;
+      renderMatrix();
+      if (currentViewMode === 'kanban') renderKanban();
+    }
+
+    // DESPACHAR COMANDA (BUMP)
+    function bumpOrder(orderId) {
+      const card = document.getElementById(`order-card-${orderId}`);
+      if (card) {
+        card.classList.add('bumped');
+      }
+
+      setTimeout(() => {
+        const orderIdx = orders.findIndex(o => o.id === orderId);
+        if (orderIdx > -1) {
+          const removed = orders.splice(orderIdx, 1)[0];
+          recallStack.push(removed);
+          updateRecallButton();
+          renderMatrix();
+          if (currentViewMode === 'kanban') renderKanban();
+        }
+      }, 160);
+    }
+
+    // DESHACER ÚLTIMO DESPACHO (RECALL TOAST POS)
+    function recallLastOrder() {
+      if (recallStack.length === 0) return;
+      const restored = recallStack.pop();
+      orders.unshift(restored);
+      updateRecallButton();
+      renderMatrix();
+      if (currentViewMode === 'kanban') renderKanban();
+    }
+
+    function updateRecallButton() {
+      const btn = document.getElementById('recall-btn');
+      const text = document.getElementById('recall-text');
+      if (recallStack.length > 0) {
+        btn.disabled = false;
+        btn.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-whisper bg-periwinkle-tint hover:bg-blue-200 text-periwinkle-ink text-xs font-bold transition-all pressable shadow-2xs";
+        text.textContent = `Deshacer #${recallStack[recallStack.length - 1].id} (Recall)`;
+      } else {
+        btn.disabled = true;
+        btn.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-whisper bg-slate-50 text-ink-tertiary text-xs font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed pressable";
+        text.textContent = "Deshacer (Recall)";
+      }
+      lucide.createIcons();
+    }
+
+    // ACTUALIZACIÓN DINÁMICA DE LA BARRA "ALL DAY"
+    function updateAllDaySummary() {
+      const summaryContainer = document.getElementById('all-day-summary');
+      summaryContainer.innerHTML = '';
+
+      const counts = {};
+      orders.forEach(order => {
+        order.items.forEach(item => {
+          if (!item.done) {
+            const shortName = item.name.replace('Pizza ', '🍕 ').replace('Refresco ', '🥤 ');
+            counts[shortName] = (counts[shortName] || 0) + item.qty;
+          }
+        });
+      });
+
+      const entries = Object.entries(counts);
+      if (entries.length === 0) {
+        summaryContainer.innerHTML = `<span class="text-ink-tertiary italic text-xs">No hay platillos pendientes en cocina.</span>`;
+        return;
+      }
+
+      entries.slice(0, 6).forEach(([name, qty]) => {
+        const badge = document.createElement('div');
+        badge.className = "px-2.5 py-1 rounded-lg bg-slate-100 border border-whisper font-mono font-bold text-ink-primary flex items-center gap-1 whitespace-nowrap";
+        badge.innerHTML = `<span class="text-jade font-extrabold">${qty}x</span> <span>${name}</span>`;
+        summaryContainer.appendChild(badge);
+      });
+    }
+
+    // SELECTOR DE VISTA (MATRIZ vs KANBAN)
+    function setViewMode(mode) {
+      currentViewMode = mode;
+      const matrixSec = document.getElementById('section-matrix');
+      const kanbanSec = document.getElementById('section-kanban');
+      const btnMatrix = document.getElementById('btn-view-matrix');
+      const btnKanban = document.getElementById('btn-view-kanban');
+      const colsSelector = document.getElementById('grid-cols-selector');
+
+      if (mode === 'matrix') {
+        matrixSec.classList.remove('hidden');
+        kanbanSec.classList.add('hidden');
+        btnMatrix.className = "px-3 py-1 rounded-lg bg-white text-ink-primary shadow-xs flex items-center gap-1.5 transition-all";
+        btnKanban.className = "px-3 py-1 rounded-lg hover:text-ink-primary flex items-center gap-1.5 transition-all";
+        colsSelector.classList.remove('hidden');
+        renderMatrix();
+      } else {
+        matrixSec.classList.add('hidden');
+        kanbanSec.classList.remove('hidden');
+        btnKanban.className = "px-3 py-1 rounded-lg bg-white text-ink-primary shadow-xs flex items-center gap-1.5 transition-all";
+        btnMatrix.className = "px-3 py-1 rounded-lg hover:text-ink-primary flex items-center gap-1.5 transition-all";
+        colsSelector.classList.add('hidden');
+        renderKanban();
+      }
+      lucide.createIcons();
+    }
+
+    // RENDERIZADO DE LA VISTA KANBAN (3 COLUMNAS)
+    function renderKanban() {
+      const colNew = document.getElementById('kanban-col-new');
+      const colPrep = document.getElementById('kanban-col-prep');
+      const colReady = document.getElementById('kanban-col-ready');
+      colNew.innerHTML = '';
+      colPrep.innerHTML = '';
+      colReady.innerHTML = '';
+
+      let countNew = 0, countPrep = 0, countReady = 0;
+
+      orders.forEach(order => {
+        const card = document.createElement('div');
+        card.className = "bg-white p-3.5 rounded-xl border border-whisper shadow-xs space-y-2.5 text-xs";
+
+        let targetCol = colNew;
+        if (order.stage === 'ready') {
+          targetCol = colReady;
+          countReady++;
+        } else if (order.stage === 'prep') {
+          targetCol = colPrep;
+          countPrep++;
+        } else {
+          targetCol = colNew;
+          countNew++;
+        }
+
+        card.innerHTML = `
+          <div class="flex items-center justify-between">
+            <span class="font-mono font-extrabold text-sm text-ink-primary">#${order.id}</span>
+            <span class="font-mono text-xs font-bold text-ink-secondary">${Math.floor(order.elapsedSeconds/60)} min</span>
+          </div>
+          <div class="font-extrabold text-ink-primary">${order.name}</div>
+          <div class="text-[11px] text-ink-secondary font-mono">${order.items.map(i => `${i.qty}x ${i.name}`).join(', ')}</div>
+          <div class="pt-2 border-t border-slate-100 flex items-center justify-between">
+            <button onclick="openChatModal('${order.name}', '${order.phone}', '${order.id}')" class="text-periwinkle-ink font-bold hover:underline text-[11px]">Ver Chat</button>
+            <button onclick="advanceKanbanStage('${order.id}')" class="px-2.5 py-1 rounded-lg bg-ink-primary text-white text-[11px] font-bold pressable">Avanzar</button>
+          </div>
+        `;
+        targetCol.appendChild(card);
+      });
+
+      document.getElementById('kanban-count-new').textContent = countNew;
+      document.getElementById('kanban-count-prep').textContent = countPrep;
+      document.getElementById('kanban-count-ready').textContent = countReady;
+    }
+
+    function advanceKanbanStage(orderId) {
+      const order = orders.find(o => o.id === orderId);
+      if (!order) return;
+      if (order.stage === 'new') order.stage = 'prep';
+      else if (order.stage === 'prep') order.stage = 'ready';
+      else if (order.stage === 'ready') {
+        bumpOrder(orderId);
+        return;
+      }
+      renderKanban();
+    }
+
+    // CAMBIAR COLUMNAS DE LA MATRIZ (4 vs 5)
+    function setGridColumns(cols) {
+      currentGridCols = cols;
+      document.getElementById('btn-col-4').className = cols === 4 
+        ? "px-2.5 py-1 rounded-lg bg-white text-ink-primary shadow-xs font-mono" 
+        : "px-2.5 py-1 rounded-lg hover:text-ink-primary font-mono";
+      document.getElementById('btn-col-5').className = cols === 5 
+        ? "px-2.5 py-1 rounded-lg bg-white text-ink-primary shadow-xs font-mono" 
+        : "px-2.5 py-1 rounded-lg hover:text-ink-primary font-mono";
+      renderMatrix();
+    }
+
+    // FILTRO DE CANAL
+    function filterChannel(ch) {
+      currentFilterChannel = ch;
+      document.querySelectorAll('.channel-btn').forEach(btn => {
+        btn.className = "channel-btn px-2 py-1 rounded-lg hover:text-ink-primary";
+      });
+      event.target.className = "channel-btn active px-2.5 py-1 rounded-lg bg-white text-ink-primary shadow-xs font-bold";
+      renderMatrix();
+    }
+
+    // NAVEGACIÓN ENTRE TABS DEL RAIL
+    function switchMainTab(tab) {
+      document.getElementById('section-matrix').classList.add('hidden');
+      document.getElementById('section-kanban').classList.add('hidden');
+      document.getElementById('section-chats').classList.add('hidden');
+      document.getElementById('section-menu').classList.add('hidden');
+
+      ['kds', 'chats', 'customers', 'menu', 'settings'].forEach(id => {
+        const el = document.getElementById('nav-' + id);
+        if (el) {
+          el.className = "w-12 h-12 rounded-2xl text-ink-secondary hover:text-ink-primary hover:bg-white border border-transparent hover:border-whisper flex flex-col items-center justify-center gap-1 pressable group relative";
+        }
+      });
+
+      const activeNav = document.getElementById('nav-' + tab);
+      if (activeNav) {
+        activeNav.className = "w-12 h-12 rounded-2xl bg-periwinkle-tint text-periwinkle-ink flex flex-col items-center justify-center gap-1 pressable relative group";
+      }
+
+      if (tab === 'kds') {
+        setViewMode(currentViewMode);
+      } else if (tab === 'chats') {
+        document.getElementById('section-chats').classList.remove('hidden');
+      } else if (tab === 'menu') {
+        document.getElementById('section-menu').classList.remove('hidden');
+      }
+      lucide.createIcons();
+    }
+
+    // MODAL DE CHAT RÁPIDO
+    function openChatModal(name, phone, orderId) {
+      const order = orders.find(o => o.id === orderId);
+      document.getElementById('modal-name').textContent = name;
+      document.getElementById('modal-phone').textContent = phone;
+      document.getElementById('modal-order').textContent = '#' + orderId;
+      document.getElementById('modal-avatar').textContent = name.split(' ').map(n => n[0]).join('').substring(0, 2);
+      if (order) {
+        document.getElementById('modal-chat-address').textContent = order.address;
+        document.getElementById('modal-order-total').textContent = `Total: ${order.total} MXN (${order.paid ? 'Pagado' : 'Cobrar'})`;
+      }
+      const modal = document.getElementById('chat-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeChatModal() {
+      const modal = document.getElementById('chat-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    let isHumanMode = false;
+    function toggleModalHandoff() {
+      isHumanMode = !isHumanMode;
+      const dot = document.getElementById('modal-bot-dot');
+      const status = document.getElementById('modal-bot-status');
+      const btn = document.getElementById('modal-handoff-btn');
+
+      if (isHumanMode) {
+        dot.className = "w-2.5 h-2.5 rounded-full bg-ochre";
+        status.textContent = "Control Humano (Tú)";
+        btn.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-ochre-subtle border border-amber-300 text-ochre font-extrabold text-xs pressable shadow-xs";
+      } else {
+        dot.className = "w-2.5 h-2.5 rounded-full bg-jade";
+        status.textContent = "Modo IA (Activo)";
+        btn.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 border border-whisper text-ink-primary font-bold text-xs pressable shadow-xs";
+      }
+    }
+
+    function toggleHandoff(btn) {
+      if (btn.innerText.includes('Tomar Control')) {
+        btn.innerHTML = '🤖 Devolver a IA';
+        btn.className = 'px-3.5 py-1.5 rounded-xl bg-ochre-subtle border border-amber-300 text-ochre text-xs font-bold pressable';
+      } else {
+        btn.innerHTML = '✋ Tomar Control';
+        btn.className = 'px-3.5 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-100 text-ink-primary text-xs font-bold pressable';
+      }
+    }
+
+    function toggleFullScreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        document.exitFullscreen().catch(() => {});
+      }
+    }
+
+    let audioActive = true;
+    function toggleAudio(btn) {
+      audioActive = !audioActive;
+      const icon = document.getElementById('audio-icon');
+      if (audioActive) {
+        icon.className = "w-4 h-4 text-jade";
+        btn.title = "Sonido de Comandas Activado";
+      } else {
+        icon.className = "w-4 h-4 text-slate-400";
+        btn.title = "Sonido Silenciado";
+      }
+    }
+
+    // INCREMENTO DE CRONÓMETROS CADA SEGUNDO
+    setInterval(() => {
+      orders.forEach(order => {
+        order.elapsedSeconds++;
+      });
+      orders.forEach(order => {
+        const card = document.getElementById(`order-card-${order.id}`);
+        if (card) {
+          const mins = Math.floor(order.elapsedSeconds / 60);
+          const secs = (order.elapsedSeconds % 60).toString().padStart(2, '0');
+          const timerEl = card.querySelector('.font-mono.text-\\[11px\\] span:last-child');
+          if (timerEl) timerEl.textContent = `${mins}:${secs} min`;
+        }
+      });
+    }, 1000);
+
+    // INICIALIZACIÓN INMEDIATA
+    document.addEventListener('DOMContentLoaded', () => {
+      renderMatrix();
+    });
+    renderMatrix();
+  </script>
+</body>
+</html>

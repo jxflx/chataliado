@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-[#F8FAFC]">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChatAliado — Monitor de Live Chat (Vista Previa Interactiva)</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Fuentes: Plus Jakarta Sans & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            'canvas-bg': '#FFFFFF',
+            'surface-subtle': '#F8FAFC',
+            'surface-elevated': '#FFFFFF',
+            'border-whisper': 'rgba(226, 232, 240, 0.8)',
+            'border-strong': '#CBD5E1',
+            'ink-primary': '#1E293B',
+            'ink-secondary': '#64748B',
+            'ink-tertiary': '#94A3B8',
+            'accent-jade': '#21B186',
+            'accent-jade-hover': '#1B9471',
+            'accent-jade-subtle': '#E8F7F2',
+            'periwinkle-tint': '#DDEEFF',
+            'periwinkle-ink': '#1E3A8A',
+            'alert-ochre': '#E7B454',
+            'alert-ochre-subtle': '#FEF7E6',
+            'alert-crimson': '#EF4444',
+          },
+          boxShadow: {
+            'glass-subtle': '0 10px 30px -5px rgba(30, 41, 59, 0.05), inset 0 1px 1px rgba(255, 255, 255, 0.9)',
+            'glass-elevated': '0 20px 40px -15px rgba(30, 41, 59, 0.08), inset 0 1px 1px rgba(255, 255, 255, 0.95)',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      color: #1E293B;
+      background-color: #F8FAFC;
+    }
+    svg.lucide {
+      stroke-width: 1.5px;
+    }
+    .pressable:active {
+      transform: scale(0.98) translateY(1px);
+      transition: transform 80ms cubic-bezier(0.32, 0.72, 0, 1);
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 5px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(203, 213, 225, 0.6);
+      border-radius: 9999px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: rgba(148, 163, 184, 0.8);
+    }
+  </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden bg-surface-subtle p-3 sm:p-5">
+
+  <!-- Encabezado Superior de la Consola -->
+  <header class="flex items-center justify-between pb-4 border-b border-border-whisper mb-3 shrink-0">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-xl bg-accent-jade-subtle border border-accent-jade/30 flex items-center justify-center text-accent-jade">
+        <i data-lucide="message-square" class="w-5 h-5"></i>
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="text-base font-bold text-ink-primary tracking-tight">Monitor de Live Chat & Handoff</h1>
+          <span class="px-2 py-0.5 text-[10px] font-mono font-semibold bg-accent-jade-subtle text-accent-jade border border-accent-jade/20 rounded-full">
+            HITO 6 - BLOQUE 3
+          </span>
+        </div>
+        <p class="text-xs text-ink-secondary">Arquitectura Trek de 3 columnas • Liquid Glass • Cero Emojis</p>
+      </div>
+    </div>
+
+    <!-- Indicadores de Estado -->
+    <div class="flex items-center gap-3">
+      <div class="hidden sm:flex items-center gap-2 text-xs font-mono font-medium text-ink-secondary bg-canvas-bg px-3 py-1.5 rounded-xl border border-border-whisper shadow-sm">
+        <span class="w-2 h-2 rounded-full bg-accent-jade animate-pulse"></span>
+        <span>Supabase Realtime Activo</span>
+      </div>
+      <button id="sound-btn" onclick="toggleSound()" class="pressable flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-xl bg-canvas-bg border border-border-whisper text-ink-secondary hover:text-ink-primary shadow-sm transition-colors">
+        <i id="sound-icon" data-lucide="volume-2" class="w-4 h-4 text-accent-jade"></i>
+        <span id="sound-text">Sonido: Activo</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Contenedor Maestro de 3 Columnas (Arquitectura Trek) -->
+  <main class="flex-1 min-h-0 bg-canvas-bg border border-border-whisper rounded-2xl shadow-glass-subtle flex overflow-hidden">
+
+    <!-- COLUMNA 1: Bandeja de Entrada (~320px) -->
+    <section class="w-full md:w-80 lg:w-[340px] shrink-0 border-r border-border-whisper flex flex-col bg-surface-subtle">
+      <!-- Buscador -->
+      <div class="p-3 border-b border-border-whisper bg-canvas-bg/80 backdrop-blur-md">
+        <div class="relative">
+          <i data-lucide="search" class="w-4 h-4 text-ink-tertiary absolute left-3 top-1/2 -translate-y-1/2"></i>
+          <input 
+            id="search-input" 
+            type="text" 
+            placeholder="Buscar por cliente, teléfono o texto..." 
+            oninput="handleSearch(this.value)"
+            class="w-full pl-9 pr-8 py-1.5 text-xs bg-surface-subtle border border-border-whisper rounded-xl text-ink-primary placeholder-ink-tertiary focus:outline-none focus:border-accent-jade focus:ring-1 focus:ring-accent-jade transition-all"
+          >
+          <button id="clear-search" onclick="clearSearch()" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-ink-tertiary hover:text-ink-primary">
+            <i data-lucide="x" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+
+        <!-- Pestañas de Filtrado -->
+        <div class="flex items-center gap-1 mt-2.5 overflow-x-auto pb-1 custom-scrollbar">
+          <button onclick="setFilter('all')" id="tab-all" class="filter-tab pressable px-2.5 py-1 text-[11px] font-medium rounded-lg transition-all bg-ink-primary text-white shadow-sm flex items-center gap-1">
+            <span>Todos</span>
+            <span class="font-mono text-[10px] opacity-80" id="count-all">3</span>
+          </button>
+          <button onclick="setFilter('open')" id="tab-open" class="filter-tab pressable px-2.5 py-1 text-[11px] font-medium rounded-lg transition-all text-ink-secondary hover:text-ink-primary bg-transparent flex items-center gap-1">
+            <span>Abiertos</span>
+            <span class="font-mono text-[10px] opacity-80" id="count-open">2</span>
+          </button>
+          <button onclick="setFilter('human')" id="tab-human" class="filter-tab pressable px-2.5 py-1 text-[11px] font-medium rounded-lg transition-all text-alert-ochre bg-alert-ochre-subtle border border-alert-ochre/30 flex items-center gap-1">
+            <i data-lucide="user-check" class="w-3 h-3 text-alert-ochre"></i>
+            <span>Humano</span>
+            <span class="font-mono text-[10px] font-bold" id="count-human">1</span>
+          </button>
+          <button onclick="setFilter('ai')" id="tab-ai" class="filter-tab pressable px-2.5 py-1 text-[11px] font-medium rounded-lg transition-all text-ink-secondary hover:text-ink-primary bg-transparent flex items-center gap-1">
+            <i data-lucide="bot" class="w-3 h-3"></i>
+            <span>IA</span>
+            <span class="font-mono text-[10px] opacity-80" id="count-ai">1</span>
+          </button>
+          <button onclick="setFilter('closed')" id="tab-closed" class="filter-tab pressable px-2.5 py-1 text-[11px] font-medium rounded-lg transition-all text-ink-secondary hover:text-ink-primary bg-transparent flex items-center gap-1">
+            <span>Cerrados</span>
+            <span class="font-mono text-[10px] opacity-80" id="count-closed">1</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Lista de Conversaciones -->
+      <div id="chat-list" class="flex-1 overflow-y-auto divide-y divide-border-whisper custom-scrollbar">
+        <!-- Renderizado dinámico vía JavaScript -->
+      </div>
+    </section>
+
+    <!-- COLUMNA 2: Diálogo Activo (Flexible y Aireada) -->
+    <section class="flex-1 flex flex-col bg-canvas-bg overflow-hidden min-w-0">
+      <!-- Cabecera de la Conversación -->
+      <div class="h-16 px-4 sm:px-6 border-b border-border-whisper flex items-center justify-between bg-canvas-bg/90 backdrop-blur-md shrink-0">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-10 h-10 rounded-full bg-periwinkle-tint text-periwinkle-ink flex items-center justify-center font-bold text-sm shrink-0 border border-border-whisper" id="header-avatar">
+            SM
+          </div>
+          <div class="min-w-0">
+            <div class="flex items-center gap-2">
+              <h2 class="font-bold text-sm text-ink-primary truncate" id="header-name">Sarah Morales</h2>
+              <a id="header-wa-link" href="https://wa.me/525541234567" target="_blank" rel="noopener noreferrer" title="Abrir en WhatsApp" class="text-accent-jade hover:underline flex items-center gap-0.5 text-[11px] font-mono">
+                <i data-lucide="message-circle" class="w-3 h-3"></i>
+                <span class="hidden sm:inline">WhatsApp</span>
+                <i data-lucide="external-link" class="w-2.5 h-2.5"></i>
+              </a>
+            </div>
+            <div class="flex items-center gap-2 text-xs text-ink-secondary">
+              <span class="font-mono text-[11px]" id="header-phone">+52 55 4123 4567</span>
+              <span>•</span>
+              <span id="header-status-badge" class="inline-flex items-center gap-1 text-[10px] font-mono font-medium px-2 py-0.5 rounded-full bg-accent-jade-subtle text-accent-jade border border-accent-jade/20">
+                <span class="w-1.5 h-1.5 rounded-full bg-accent-jade"></span>
+                Ticket Abierto
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Acciones de Intervención -->
+        <div class="flex items-center gap-2">
+          <!-- Switch de Modo IA / Humano -->
+          <button id="mode-toggle-btn" onclick="toggleCurrentMode()" class="pressable flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl bg-alert-ochre-subtle text-alert-ochre border border-alert-ochre/30 hover:bg-alert-ochre/20 transition-all shadow-sm">
+            <i id="mode-icon" data-lucide="hand" class="w-3.5 h-3.5"></i>
+            <span id="mode-label">Tomar Control</span>
+          </button>
+
+          <!-- Cerrar / Reabrir Ticket -->
+          <button id="status-toggle-btn" onclick="toggleCurrentStatus()" class="pressable p-2 rounded-xl text-ink-secondary hover:text-ink-primary hover:bg-surface-subtle border border-border-whisper transition-all" title="Cerrar ticket">
+            <i id="status-icon" data-lucide="check-circle" class="w-4 h-4"></i>
+          </button>
+
+          <!-- Toggle Ficha Lateral de Cliente -->
+          <button onclick="toggleSidebar()" class="pressable p-2 rounded-xl text-ink-secondary hover:text-ink-primary hover:bg-surface-subtle border border-border-whisper transition-all" title="Ver ficha del cliente">
+            <i data-lucide="panel-right" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Banner de Advertencia / Estado en Modo IA -->
+      <div id="ai-banner" class="px-4 py-2 bg-surface-subtle border-b border-border-whisper flex items-center justify-between text-xs text-ink-secondary shrink-0">
+        <div class="flex items-center gap-2">
+          <i data-lucide="bot" class="w-4 h-4 text-accent-jade"></i>
+          <span>El bot está respondiendo automáticamente. Para escribir un mensaje, toma el control.</span>
+        </div>
+        <button onclick="takeControlQuick()" class="pressable text-[11px] font-semibold text-alert-ochre hover:underline flex items-center gap-1">
+          <span>Tomar Control Ahora</span>
+          <i data-lucide="arrow-right" class="w-3 h-3"></i>
+        </button>
+      </div>
+
+      <!-- Ventana de Mensajes con Scroll Inteligente -->
+      <div id="message-container" class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-3 custom-scrollbar relative bg-gradient-to-b from-surface-subtle/30 to-canvas-bg">
+        <!-- Burbujas renderizadas dinámicamente -->
+      </div>
+
+      <!-- Botón Flotante de Scroll "Nuevos Mensajes" -->
+      <div id="scroll-bottom-btn" class="hidden absolute bottom-24 left-1/2 -translate-x-1/2 z-10">
+        <button onclick="scrollToBottom()" class="pressable px-3 py-1.5 bg-ink-primary text-white text-xs font-medium rounded-full shadow-lg flex items-center gap-1.5 hover:bg-ink-primary/90 transition-all">
+          <i data-lucide="arrow-down" class="w-3.5 h-3.5"></i>
+          <span>Nuevos mensajes</span>
+        </button>
+      </div>
+
+      <!-- Entrada de Texto (MessageInput) -->
+      <div class="p-3 sm:p-4 border-t border-border-whisper bg-canvas-bg shrink-0">
+        <form id="message-form" onsubmit="sendMessage(event)" class="space-y-2">
+          <div class="relative flex items-end gap-2 bg-surface-subtle border border-border-whisper focus-within:border-accent-jade focus-within:ring-1 focus-within:ring-accent-jade rounded-2xl p-2 transition-all">
+            <textarea 
+              id="message-textarea" 
+              rows="1" 
+              placeholder="Escribe un mensaje para el comensal (Enter para enviar, Shift+Enter para salto)..." 
+              onkeydown="handleTextareaKeydown(event)"
+              class="flex-1 bg-transparent resize-none text-xs sm:text-sm text-ink-primary placeholder-ink-tertiary focus:outline-none max-h-32 py-1 px-2 custom-scrollbar"
+            ></textarea>
+            <button 
+              type="submit" 
+              id="send-btn" 
+              class="pressable p-2 bg-accent-jade hover:bg-accent-jade-hover text-white rounded-xl shadow-sm transition-all flex items-center justify-center shrink-0"
+              title="Enviar mensaje"
+            >
+              <i data-lucide="send" class="w-4 h-4"></i>
+            </button>
+          </div>
+          <div class="flex items-center justify-between text-[11px] text-ink-tertiary px-1">
+            <span>Envío en tiempo real conectado con WhatsApp</span>
+            <span class="font-mono text-[10px]">Enter = Enviar • Shift+Enter = Salto de línea</span>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- COLUMNA 3: Ficha de Cliente y Libreta del Mesero (~300px Colapsable) -->
+    <aside id="customer-sidebar" class="w-72 lg:w-80 shrink-0 border-l border-border-whisper bg-surface-subtle flex flex-col transition-all duration-300 overflow-hidden">
+      <!-- Encabezado de la Ficha -->
+      <div class="h-16 px-4 border-b border-border-whisper flex items-center justify-between bg-canvas-bg shrink-0">
+        <div class="flex items-center gap-2">
+          <i data-lucide="user" class="w-4 h-4 text-ink-secondary"></i>
+          <span class="font-bold text-xs text-ink-primary">Ficha del Cliente</span>
+        </div>
+        <button onclick="toggleSidebar()" class="pressable p-1.5 text-ink-tertiary hover:text-ink-primary rounded-lg transition-colors">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Contenido Scrollable de la Ficha -->
+      <div class="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
+        <!-- Datos de Contacto -->
+        <div class="p-3.5 bg-canvas-bg border border-border-whisper rounded-xl shadow-sm space-y-2">
+          <div class="text-[11px] font-semibold text-ink-tertiary uppercase tracking-wider">Contacto</div>
+          <div class="font-bold text-sm text-ink-primary" id="sidebar-name">Sarah Morales</div>
+          <div class="font-mono text-xs text-ink-secondary flex items-center gap-1.5" id="sidebar-phone">
+            <i data-lucide="phone" class="w-3.5 h-3.5 text-ink-tertiary"></i>
+            <span>+52 55 4123 4567</span>
+          </div>
+          <div class="text-[11px] text-ink-tertiary flex items-center gap-1.5">
+            <i data-lucide="calendar" class="w-3.5 h-3.5 text-ink-tertiary"></i>
+            <span>Registrado: 15 agosto, 2026</span>
+          </div>
+        </div>
+
+        <!-- Libreta del Mesero (notes_md) con los 4 Bloques -->
+        <div class="p-3.5 bg-canvas-bg border border-border-whisper rounded-xl shadow-sm space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-1.5">
+              <i data-lucide="book-open" class="w-4 h-4 text-accent-jade"></i>
+              <span class="font-bold text-xs text-ink-primary">Libreta del Mesero</span>
+            </div>
+            <button id="edit-notes-btn" onclick="toggleEditNotes()" class="pressable text-[11px] font-semibold text-accent-jade hover:underline flex items-center gap-1">
+              <i data-lucide="edit-3" class="w-3 h-3"></i>
+              <span>Editar</span>
+            </button>
+          </div>
+
+          <!-- Modo Vista de los 4 Bloques -->
+          <div id="notes-view-mode" class="space-y-2.5">
+            <!-- Bloque 1: Entrega -->
+            <div class="p-2.5 rounded-lg bg-surface-subtle border border-border-whisper space-y-1">
+              <div class="flex items-center gap-1.5 text-[11px] font-semibold text-ink-primary">
+                <i data-lucide="map-pin" class="w-3.5 h-3.5 text-accent-jade"></i>
+                <span>Entrega Habitual</span>
+              </div>
+              <p class="text-xs text-ink-secondary pl-5" id="note-delivery">Av. Insurgentes Sur 1234, Depto 502, portón negro, timbre no sirve.</p>
+            </div>
+
+            <!-- Bloque 2: Alergias / Restricciones -->
+            <div class="p-2.5 rounded-lg bg-alert-ochre-subtle border border-alert-ochre/20 space-y-1">
+              <div class="flex items-center gap-1.5 text-[11px] font-semibold text-alert-ochre">
+                <i data-lucide="alert-triangle" class="w-3.5 h-3.5 text-alert-ochre"></i>
+                <span>Restricciones / Alergias</span>
+              </div>
+              <p class="text-xs text-ink-secondary pl-5" id="note-allergies">Alérgico a mariscos y champiñones.</p>
+            </div>
+
+            <!-- Bloque 3: Preferencias Habituales -->
+            <div class="p-2.5 rounded-lg bg-surface-subtle border border-border-whisper space-y-1">
+              <div class="flex items-center gap-1.5 text-[11px] font-semibold text-ink-primary">
+                <i data-lucide="heart" class="w-3.5 h-3.5 text-accent-jade"></i>
+                <span>Preferencias Habituales</span>
+              </div>
+              <p class="text-xs text-ink-secondary pl-5" id="note-preferences">Masa delgada bien crujiente, orilla tradicional, salsa picante aparte.</p>
+            </div>
+
+            <!-- Bloque 4: Último Pedido Confirmado -->
+            <div class="p-2.5 rounded-lg bg-surface-subtle border border-border-whisper space-y-1">
+              <div class="flex items-center gap-1.5 text-[11px] font-semibold text-ink-primary">
+                <i data-lucide="package" class="w-3.5 h-3.5 text-accent-jade"></i>
+                <span>Último Pedido Confirmado</span>
+              </div>
+              <p class="text-xs text-ink-secondary pl-5 font-mono text-[11px]" id="note-last-order">1x Pizza Margherita Grande (Masa Delgada), 1x Refresco 600ml</p>
+            </div>
+          </div>
+
+          <!-- Modo Edición In-Place -->
+          <div id="notes-edit-mode" class="hidden space-y-2">
+            <textarea 
+              id="notes-textarea" 
+              rows="8" 
+              class="w-full text-xs font-mono p-2.5 bg-surface-subtle border border-border-strong rounded-xl text-ink-primary focus:outline-none focus:border-accent-jade focus:ring-1 focus:ring-accent-jade custom-scrollbar leading-relaxed"
+            ></textarea>
+            <div class="flex items-center justify-between pt-1">
+              <span class="text-[10px] text-ink-tertiary font-mono" id="char-counter">0 / 5000</span>
+              <div class="flex items-center gap-2">
+                <button onclick="cancelEditNotes()" class="pressable px-2.5 py-1 text-xs text-ink-secondary hover:text-ink-primary rounded-lg border border-border-whisper">
+                  Cancelar
+                </button>
+                <button onclick="saveNotes()" class="pressable px-3 py-1 text-xs font-semibold bg-accent-jade text-white rounded-lg hover:bg-accent-jade-hover shadow-sm">
+                  Guardar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Indicador de Historial -->
+        <div class="text-center p-3 text-[11px] text-ink-tertiary">
+          <span>Los datos de esta ficha se sincronizan en vivo con Supabase PostgreSQL y el agente LLM</span>
+        </div>
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- Lógica Interactiva en JavaScript (Simulación de Estado) -->
+  <script>
+    // Estado de datos simulados
+    const conversationsData = [
+      {
+        id: 'convo-1',
+        customer: {
+          id: 'cust-1',
+          name: 'Sarah Morales',
+          phone: '+525541234567',
+          notes_md: `- Entrega: Av. Insurgentes Sur 1234, Depto 502, portón negro, timbre no sirve.\n- Restricciones/Alergias: Alérgico a mariscos y champiñones.\n- Preferencias Habituales: Masa delgada bien crujiente, orilla tradicional, salsa picante aparte.\n- Último Pedido Confirmado: 1x Pizza Margherita Grande (Masa Delgada), 1x Refresco 600ml`
+        },
+        mode: 'ai',
+        status: 'open',
+        lastMessage: '¿Tienen la pizza margarita disponible para entrega hoy?',
+        time: '14:20',
+        unread: 1,
+        messages: [
+          { role: 'user', content: 'Hola buenas tardes, quisiera ver el menú de hoy por favor', time: '14:15' },
+          { role: 'assistant', content: '¡Hola Sarah! Con gusto te paso nuestras opciones. Tenemos pizzas tradicionales (Pepperoni, Hawaiana, Cuatro Quesos) y nuestras especialidades gourmet. ¿Se te antoja alguna en particular?', time: '14:16' },
+          { role: 'user', content: '¿Tienen la pizza margarita disponible para entrega hoy?', time: '14:20' }
+        ]
+      },
+      {
+        id: 'convo-2',
+        customer: {
+          id: 'cust-2',
+          name: 'Carlos Ramírez',
+          phone: '+525598765432',
+          notes_md: `- Entrega: Calle Sonora 88, Col. Condesa.\n- Restricciones/Alergias: Sin cebolla en todo.\n- Preferencias Habituales: Salsa extra picante.\n- Último Pedido Confirmado: 2x Pizza Pepperoni Mediana`
+        },
+        mode: 'human',
+        status: 'open',
+        lastMessage: 'Por favor ayúdenme, mi pedido llegó frío hace 10 minutos',
+        time: '14:10',
+        unread: 2,
+        messages: [
+          { role: 'user', content: 'Hola, tengo una queja sobre el pedido que acaba de llegar', time: '14:05' },
+          { role: 'user', content: 'Por favor ayúdenme, mi pedido llegó frío hace 10 minutos', time: '14:10' },
+          { role: 'system', content: 'Intervención requerida: El cliente solicitó atención de soporte por demora/temperatura', time: '14:10' }
+        ]
+      },
+      {
+        id: 'convo-3',
+        customer: {
+          id: 'cust-3',
+          name: 'Lucía Fernández',
+          phone: '+525555551234',
+          notes_md: `- Entrega: Paseo de la Reforma 400.\n- Restricciones/Alergias: Sin gluten si es posible.\n- Preferencias Habituales: Refresco sin azúcar.\n- Último Pedido Confirmado: 1x Ensalada César, 1x Agua embotellada`
+        },
+        mode: 'ai',
+        status: 'closed',
+        lastMessage: 'Muchas gracias por la atención, todo delicioso!',
+        time: 'Ayer',
+        unread: 0,
+        messages: [
+          { role: 'user', content: 'Ya recibí mi pedido, muchas gracias por la atención, todo delicioso!', time: 'Ayer 20:30' },
+          { role: 'assistant', content: '¡Qué alegría Lucía! Nos encanta saber que lo disfrutaste. ¡Que tengas un excelente día!', time: 'Ayer 20:31' }
+        ]
+      }
+    ];
+
+    let activeConvoId = 'convo-1';
+    let currentFilter = 'all';
+    let soundEnabled = true;
+    let isSidebarOpen = true;
+
+    // Inicializar interfaz
+    function init() {
+      renderChatList();
+      renderActiveChat();
+      updateFilterCounts();
+      lucide.createIcons();
+    }
+
+    // Renderizar Lista de Chats
+    function renderChatList() {
+      const container = document.getElementById('chat-list');
+      container.innerHTML = '';
+
+      const query = document.getElementById('search-input').value.toLowerCase();
+
+      const filtered = conversationsData.filter(c => {
+        // Filtro por texto
+        const matchQuery = !query || 
+          c.customer.name.toLowerCase().includes(query) || 
+          c.customer.phone.includes(query) || 
+          c.lastMessage.toLowerCase().includes(query);
+
+        if (!matchQuery) return false;
+
+        // Filtro por pestaña
+        if (currentFilter === 'open') return c.status === 'open';
+        if (currentFilter === 'closed') return c.status === 'closed';
+        if (currentFilter === 'human') return c.mode === 'human';
+        if (currentFilter === 'ai') return c.mode === 'ai';
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="p-8 text-center text-xs text-ink-tertiary space-y-2">
+            <i data-lucide="inbox" class="w-8 h-8 mx-auto text-ink-tertiary/50"></i>
+            <div>No se encontraron conversaciones con este filtro.</div>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      filtered.forEach(c => {
+        const isActive = c.id === activeConvoId;
+        const initials = c.customer.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+
+        const item = document.createElement('div');
+        item.className = `p-3 sm:p-3.5 cursor-pointer transition-all flex items-start gap-3 select-none ${
+          isActive 
+            ? 'bg-periwinkle-tint/80 border-l-4 border-accent-jade shadow-sm' 
+            : 'hover:bg-canvas-bg/80 border-l-4 border-transparent'
+        }`;
+        item.onclick = () => selectConvo(c.id);
+
+        item.innerHTML = `
+          <div class="w-10 h-10 rounded-full ${isActive ? 'bg-periwinkle-ink text-white' : 'bg-border-whisper text-ink-primary'} flex items-center justify-center font-bold text-xs shrink-0">
+            ${initials}
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between mb-0.5">
+              <span class="font-bold text-xs text-ink-primary truncate">${c.customer.name}</span>
+              <span class="font-mono text-[10px] text-ink-tertiary">${c.time}</span>
+            </div>
+            <p class="text-xs text-ink-secondary truncate mb-1.5">${c.lastMessage}</p>
+            <div class="flex items-center gap-1.5">
+              ${c.mode === 'human' 
+                ? '<span class="inline-flex items-center gap-1 text-[10px] font-semibold text-alert-ochre bg-alert-ochre-subtle px-1.5 py-0.5 rounded-md border border-alert-ochre/30"><i data-lucide="user-check" class="w-3 h-3"></i>Requiere Humano</span>'
+                : '<span class="inline-flex items-center gap-1 text-[10px] font-medium text-accent-jade bg-accent-jade-subtle px-1.5 py-0.5 rounded-md border border-accent-jade/20"><i data-lucide="bot" class="w-3 h-3"></i>IA Activa</span>'
+              }
+              ${c.unread > 0 
+                ? `<span class="ml-auto w-4 h-4 rounded-full bg-accent-jade text-white font-mono text-[10px] font-bold flex items-center justify-center">${c.unread}</span>` 
+                : ''}
+            </div>
+          </div>
+        `;
+        container.appendChild(item);
+      });
+
+      lucide.createIcons();
+    }
+
+    // Seleccionar Conversación
+    function selectConvo(id) {
+      activeConvoId = id;
+      const convo = conversationsData.find(c => c.id === id);
+      if (convo) convo.unread = 0;
+      renderChatList();
+      renderActiveChat();
+      updateFilterCounts();
+    }
+
+    // Renderizar Conversación Activa
+    function renderActiveChat() {
+      const convo = conversationsData.find(c => c.id === activeConvoId);
+      if (!convo) return;
+
+      const initials = convo.customer.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+
+      // Header
+      document.getElementById('header-avatar').textContent = initials;
+      document.getElementById('header-name').textContent = convo.customer.name;
+      document.getElementById('header-phone').textContent = convo.customer.phone;
+      document.getElementById('header-wa-link').href = `https://wa.me/${convo.customer.phone.replace(/[^0-9]/g, '')}`;
+
+      const statusBadge = document.getElementById('header-status-badge');
+      if (convo.status === 'open') {
+        statusBadge.className = 'inline-flex items-center gap-1 text-[10px] font-mono font-medium px-2 py-0.5 rounded-full bg-accent-jade-subtle text-accent-jade border border-accent-jade/20';
+        statusBadge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-accent-jade"></span>Ticket Abierto';
+        document.getElementById('status-icon').setAttribute('data-lucide', 'check-circle');
+      } else {
+        statusBadge.className = 'inline-flex items-center gap-1 text-[10px] font-mono font-medium px-2 py-0.5 rounded-full bg-surface-subtle text-ink-tertiary border border-border-whisper';
+        statusBadge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-ink-tertiary"></span>Ticket Cerrado';
+        document.getElementById('status-icon').setAttribute('data-lucide', 'rotate-ccw');
+      }
+
+      // Mode Switch
+      const modeBtn = document.getElementById('mode-toggle-btn');
+      const modeLabel = document.getElementById('mode-label');
+      const modeIcon = document.getElementById('mode-icon');
+      const aiBanner = document.getElementById('ai-banner');
+
+      if (convo.mode === 'ai') {
+        modeBtn.className = 'pressable flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl bg-alert-ochre-subtle text-alert-ochre border border-alert-ochre/30 hover:bg-alert-ochre/20 transition-all shadow-sm';
+        modeLabel.textContent = 'Tomar Control';
+        modeIcon.setAttribute('data-lucide', 'hand');
+        aiBanner.classList.remove('hidden');
+      } else {
+        modeBtn.className = 'pressable flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl bg-accent-jade-subtle text-accent-jade border border-accent-jade/30 hover:bg-accent-jade/20 transition-all shadow-sm';
+        modeLabel.textContent = 'Devolver a IA';
+        modeIcon.setAttribute('data-lucide', 'bot');
+        aiBanner.classList.add('hidden');
+      }
+
+      // Mensajes
+      const msgContainer = document.getElementById('message-container');
+      msgContainer.innerHTML = '';
+
+      convo.messages.forEach(msg => {
+        const bubble = document.createElement('div');
+        if (msg.role === 'system') {
+          bubble.className = 'flex justify-center my-3';
+          bubble.innerHTML = `
+            <div class="px-3 py-1 rounded-full bg-surface-subtle border border-border-whisper text-ink-secondary text-[11px] font-mono flex items-center gap-1.5 shadow-sm">
+              <i data-lucide="info" class="w-3.5 h-3.5 text-ink-tertiary"></i>
+              <span>${msg.content}</span>
+            </div>
+          `;
+        } else if (msg.role === 'user') {
+          // Comensal (Izquierda, Periwinkle)
+          bubble.className = 'flex flex-col items-start max-w-[85%] sm:max-w-[70%]';
+          bubble.innerHTML = `
+            <div class="px-4 py-2.5 rounded-2xl rounded-tl-sm bg-periwinkle-tint text-ink-primary shadow-sm text-xs sm:text-sm leading-relaxed">
+              ${msg.content}
+            </div>
+            <span class="text-[10px] font-mono text-ink-tertiary mt-1 pl-1">${msg.time}</span>
+          `;
+        } else if (msg.role === 'assistant') {
+          // Bot IA (Derecha, Blanco con borde Jade)
+          bubble.className = 'flex flex-col items-end max-w-[85%] sm:max-w-[70%] ml-auto';
+          bubble.innerHTML = `
+            <div class="px-4 py-2.5 rounded-2xl rounded-tr-sm bg-canvas-bg border border-accent-jade/40 shadow-sm text-xs sm:text-sm leading-relaxed text-ink-primary">
+              <div class="text-[10px] font-bold text-accent-jade mb-1 flex items-center gap-1">
+                <i data-lucide="bot" class="w-3 h-3"></i>
+                <span>ChatAliado</span>
+              </div>
+              ${msg.content}
+            </div>
+            <span class="text-[10px] font-mono text-ink-tertiary mt-1 pr-1">${msg.time}</span>
+          `;
+        } else {
+          // Operador Humano (Derecha, Blanco con borde Slate)
+          bubble.className = 'flex flex-col items-end max-w-[85%] sm:max-w-[70%] ml-auto';
+          bubble.innerHTML = `
+            <div class="px-4 py-2.5 rounded-2xl rounded-tr-sm bg-canvas-bg border border-border-strong shadow-sm text-xs sm:text-sm leading-relaxed text-ink-primary">
+              <div class="text-[10px] font-bold text-ink-secondary mb-1 flex items-center gap-1">
+                <i data-lucide="user" class="w-3 h-3"></i>
+                <span>Operador (Tú)</span>
+              </div>
+              ${msg.content}
+            </div>
+            <span class="text-[10px] font-mono text-ink-tertiary mt-1 pr-1">${msg.time}</span>
+          `;
+        }
+        msgContainer.appendChild(bubble);
+      });
+
+      // Ficha Lateral
+      document.getElementById('sidebar-name').textContent = convo.customer.name;
+      document.getElementById('sidebar-phone').querySelector('span').textContent = convo.customer.phone;
+      parseCustomerNotes(convo.customer.notes_md);
+
+      scrollToBottom();
+      lucide.createIcons();
+    }
+
+    // Scroll al final
+    function scrollToBottom() {
+      const container = document.getElementById('message-container');
+      container.scrollTop = container.scrollHeight;
+      document.getElementById('scroll-bottom-btn').classList.add('hidden');
+    }
+
+    // Toggle Modo IA / Humano
+    function toggleCurrentMode() {
+      const convo = conversationsData.find(c => c.id === activeConvoId);
+      if (!convo) return;
+      convo.mode = convo.mode === 'ai' ? 'human' : 'ai';
+      renderChatList();
+      renderActiveChat();
+      updateFilterCounts();
+    }
+
+    // Tomar Control rápido
+    function takeControlQuick() {
+      const convo = conversationsData.find(c => c.id === activeConvoId);
+      if (!convo) return;
+      convo.mode = 'human';
+      renderChatList();
+      renderActiveChat();
+      updateFilterCounts();
+      document.getElementById('message-textarea').focus();
+    }
+
+    // Toggle Estado Abierto / Cerrado
+    function toggleCurrentStatus() {
+      const convo = conversationsData.find(c => c.id === activeConvoId);
+      if (!convo) return;
+      convo.status = convo.status === 'open' ? 'closed' : 'open';
+      renderChatList();
+      renderActiveChat();
+      updateFilterCounts();
+    }
+
+    // Enviar Mensaje
+    function sendMessage(e) {
+      if (e) e.preventDefault();
+      const textarea = document.getElementById('message-textarea');
+      const text = textarea.value.trim();
+      if (!text) return;
+
+      const convo = conversationsData.find(c => c.id === activeConvoId);
+      if (!convo) return;
+
+      convo.mode = 'human';
+
+      const now = new Date();
+      const timeStr = `${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+      convo.messages.push({
+        role: 'human_agent',
+        content: text,
+        time: timeStr
+      });
+      convo.lastMessage = text;
+      convo.time = timeStr;
+
+      textarea.value = '';
+      textarea.style.height = 'auto';
+
+      renderChatList();
+      renderActiveChat();
+      scrollToBottom();
+    }
+
+    // Manejar Enter en Textarea
+    function handleTextareaKeydown(e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    }
+
+    // Filtros
+    function setFilter(filter) {
+      currentFilter = filter;
+      document.querySelectorAll('.filter-tab').forEach(tab => {
+        tab.className = tab.className.replace('bg-ink-primary text-white', 'text-ink-secondary bg-transparent');
+      });
+      const activeTab = document.getElementById(`tab-${filter}`);
+      if (activeTab) {
+        activeTab.className = activeTab.className.replace('text-ink-secondary bg-transparent', 'bg-ink-primary text-white');
+      }
+      renderChatList();
+    }
+
+    function updateFilterCounts() {
+      document.getElementById('count-all').textContent = conversationsData.length;
+      document.getElementById('count-open').textContent = conversationsData.filter(c => c.status === 'open').length;
+      document.getElementById('count-human').textContent = conversationsData.filter(c => c.mode === 'human').length;
+      document.getElementById('count-ai').textContent = conversationsData.filter(c => c.mode === 'ai').length;
+      document.getElementById('count-closed').textContent = conversationsData.filter(c => c.status === 'closed').length;
+    }
+
+    // Búsqueda
+    function handleSearch(val) {
+      const clearBtn = document.getElementById('clear-search');
+      if (val) clearBtn.classList.remove('hidden');
+      else clearBtn.classList.add('hidden');
+      renderChatList();
+    }
+
+    function clearSearch() {
+      const input = document.getElementById('search-input');
+      input.value = '';
+      document.getElementById('clear-search').classList.add('hidden');
+      renderChatList();
+    }
+
+    // Toggle Sonido
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      const icon = document.getElementById('sound-icon');
+      const text = document.getElementById('sound-text');
+      if (soundEnabled) {
+        icon.setAttribute('data-lucide', 'volume-2');
+        icon.className = 'w-4 h-4 text-accent-jade';
+        text.textContent = 'Sonido: Activo';
+      } else {
+        icon.setAttribute('data-lucide', 'volume-x');
+        icon.className = 'w-4 h-4 text-ink-tertiary';
+        text.textContent = 'Sonido: Silencio';
+      }
+      lucide.createIcons();
+    }
+
+    // Toggle Ficha Lateral
+    function toggleSidebar() {
+      isSidebarOpen = !isSidebarOpen;
+      const sidebar = document.getElementById('customer-sidebar');
+      if (isSidebarOpen) {
+        sidebar.classList.remove('hidden');
+      } else {
+        sidebar.classList.add('hidden');
+      }
+    }
+
+    // Parsear Notas del Mesero
+    function parseCustomerNotes(raw) {
+      let delivery = 'No registrada';
+      let allergies = 'Ninguna conocida';
+      let preferences = 'No especificadas';
+      let lastOrder = 'Sin pedidos previos';
+
+      if (raw) {
+        const lines = raw.split('\n');
+        lines.forEach(l => {
+          if (l.includes('Entrega:')) delivery = l.split('Entrega:')[1]?.trim() || delivery;
+          if (l.includes('Restricciones') || l.includes('Alergias')) allergies = l.split(':')[1]?.trim() || allergies;
+          if (l.includes('Preferencias')) preferences = l.split('Preferencias Habituales:')[1]?.trim() || preferences;
+          if (l.includes('Último Pedido')) lastOrder = l.split('Último Pedido Confirmado:')[1]?.trim() || lastOrder;
+        });
+      }
+
+      document.getElementById('note-delivery').textContent = delivery;
+      document.getElementById('note-allergies').textContent = allergies;
+      document.getElementById('note-preferences').textContent = preferences;
+      document.getElementById('note-last-order').textContent = lastOrder;
+    }
+
+    // Edición In-Place de Notas
+    function toggleEditNotes() {
+      const convo = conversationsData.find(c => c.id === activeConvoId);
+      if (!convo) return;
+
+      document.getElementById('notes-view-mode').classList.add('hidden');
+      document.getElementById('notes-edit-mode').classList.remove('hidden');
+      document.getElementById('edit-notes-btn').classList.add('hidden');
+
+      const textarea = document.getElementById('notes-textarea');
+      textarea.value = convo.customer.notes_md || '';
+      document.getElementById('char-counter').textContent = `${textarea.value.length} / 5000`;
+
+      textarea.oninput = () => {
+        document.getElementById('char-counter').textContent = `${textarea.value.length} / 5000`;
+      };
+    }
+
+    function cancelEditNotes() {
+      document.getElementById('notes-view-mode').classList.remove('hidden');
+      document.getElementById('notes-edit-mode').classList.add('hidden');
+      document.getElementById('edit-notes-btn').classList.remove('hidden');
+    }
+
+    function saveNotes() {
+      const convo = conversationsData.find(c => c.id === activeConvoId);
+      if (!convo) return;
+
+      const newNotes = document.getElementById('notes-textarea').value;
+      convo.customer.notes_md = newNotes;
+      parseCustomerNotes(newNotes);
+
+      cancelEditNotes();
+    }
+
+    // Iniciar
+    init();
+  </script>
+</body>
+</html>

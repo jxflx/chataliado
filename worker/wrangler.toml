@@ -1,0 +1,27 @@
+name = "chataliado-worker"
+main = "src/index.ts"
+compatibility_date = "2025-08-18"
+compatibility_flags = ["nodejs_compat"]
+
+[dev]
+port = 8787
+ip = "0.0.0.0"
+
+[vars]
+WEBHOOK_VERIFY_TOKEN = "test-webhook-verify-token-123"
+EVOLUTION_API_URL = "http://evolution-api:8080"
+EVOLUTION_API_KEY = "test-evo-api-key"
+SUPABASE_URL = "https://local-test.supabase.co"
+SUPABASE_ANON_KEY = "test-anon-key"
+SUPABASE_SERVICE_ROLE_KEY = "test-service-key"
+LLM_API_KEY = "test-llm-api-key"
+LLM_MODEL = "gpt-4o-mini"
+LLM_BASE_URL = "https://api.openai.com/v1"
+CHATWOOT_BASE_URL = "https://app.chatwoot.com"
+CHATWOOT_API_TOKEN = "test-chatwoot-api-token"
+CHATWOOT_ACCOUNT_ID = "1"
+CHATWOOT_INBOX_ID = "1"
+CHATWOOT_WEBHOOK_TOKEN = "test-chatwoot-webhook-token"
+
+[observability]
+enabled = true

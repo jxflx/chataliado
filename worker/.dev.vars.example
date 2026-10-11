@@ -1,0 +1,36 @@
+# Copy this file to .dev.vars and fill in real values for local development.
+# These variables are injected as env bindings in the Worker.
+
+# Evolution API connection
+EVOLUTION_API_URL=https://your-evolution-instance.example.com
+EVOLUTION_API_KEY=your_evolution_api_key_here
+
+# Webhook security — shared secret between Evolution API and this Worker
+WEBHOOK_VERIFY_TOKEN=your_random_webhook_secret_here
+
+# Supabase connection (for future use)
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_ANON_KEY=your_supabase_anon_key_here
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key_here
+
+# LLM Provider configuration (OpenAI, Groq, OpenRouter, Gemini, etc.)
+LLM_API_KEY=your_llm_api_key_here
+LLM_MODEL=gpt-4o-mini
+LLM_BASE_URL=https://api.openai.com/v1
+
+# Chatwoot Human Handoff configuration
+CHATWOOT_BASE_URL=http://localhost:3005
+CHATWOOT_API_TOKEN=your_chatwoot_api_token_here
+CHATWOOT_ACCOUNT_ID=1
+CHATWOOT_INBOX_ID=1
+CHATWOOT_WEBHOOK_TOKEN=your_chatwoot_webhook_secret_here
+
+# 🛡️ Control de Tráfico y Seguridad en Desarrollo
+# PHONE_WHITELIST: Números autorizados separados por coma.
+# Ejemplos: "5215512345678, 5598765432"
+# Si está vacío o no se define, se permite responder a cualquier número.
+PHONE_WHITELIST=
+
+# MAX_MESSAGE_AGE_SECONDS: Descarta mensajes con más de N segundos de antigüedad (anti-ráfaga de sync).
+# Por defecto: 120 (2 minutos)
+MAX_MESSAGE_AGE_SECONDS=120

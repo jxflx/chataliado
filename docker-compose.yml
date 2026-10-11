@@ -1,17 +1,76 @@
-# PostgreSQL local para cuando se migre desde SQLite (requiere Docker).
-# Uso: docker compose up -d
+# Docker Compose para ChatAliado (Postgres, Evolution API y Worker)
+# Uso: docker compose up -d --build
+
 services:
-  db:
-    image: postgres:16-alpine
+  postgres:
+    image: postgres:15-alpine
+    container_name: chataliado_postgres
+    restart: always
     environment:
-      POSTGRES_USER: chataliado
-      POSTGRES_PASSWORD: chataliado
-      POSTGRES_DB: chataliado
+      POSTGRES_USER: evolution
+      POSTGRES_PASSWORD: evolution_password
+      POSTGRES_DB: evolution_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+
+  worker:
+    build:
+      context: ./worker
+      dockerfile: Dockerfile
+    container_name: chataliado_worker
+    restart: always
+    ports:
+      - "8787:8787"
+    environment:
+      - EVOLUTION_API_URL=http://evolution-api:8080
+      - EVOLUTION_API_KEY=test-evo-api-key
+      - WEBHOOK_VERIFY_TOKEN=test-webhook-verify-token-123
+      - PHONE_WHITELIST=${PHONE_WHITELIST:-}
+      - MAX_MESSAGE_AGE_SECONDS=${MAX_MESSAGE_AGE_SECONDS:-120}
+      - SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+      - SSL_CERT_DIR=/etc/ssl/certs
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - ./worker/src:/app/src
+      - ./worker/wrangler.toml:/app/wrangler.toml
+      - ./worker/.dev.vars:/app/.dev.vars
+
+  evolution-api:
+    image: evoapicloud/evolution-api:latest
+    container_name: chataliado_evolution_api
+    restart: always
+    depends_on:
+      - postgres
+      - worker
+    ports:
+      - "8080:8080"
+    environment:
+      - SERVER_URL=http://localhost:8080
+      - AUTHENTICATION_API_KEY=test-evo-api-key
+      - DATABASE_ENABLED=true
+      - DATABASE_PROVIDER=postgresql
+      - DATABASE_CONNECTION_URI=postgresql://evolution:evolution_password@postgres:5432/evolution_db
+      - DATABASE_SAVE_DATA_INSTANCE=true
+      - DATABASE_SAVE_DATA_NEW_MESSAGE=true
+      - DATABASE_SAVE_MESSAGE_UPDATE=true
+      - DATABASE_SAVE_DATA_CONTACTS=false
+      - DATABASE_SAVE_DATA_CHATS=false
+      - DATABASE_SAVE_DATA_HISTORIC=false
+      - CACHE_REDIS_ENABLED=false
+      - CACHE_LOCAL_ENABLED=true
+      - CONFIG_SESSION_PHONE_CLIENT=ChatAliado
+      - CONFIG_SESSION_PHONE_NAME=Chrome
+      - CONFIG_SESSION_PHONE_VERSION=2.3000.1023204200
+      - WEB_VERSION=2.3000.1023204200
+      - WEBHOOK_GLOBAL_ENABLED=true
+      - WEBHOOK_GLOBAL_URL=http://worker:8787/webhook/evolution
+      - WEBHOOK_EVENTS_MESSAGES_UPSERT=true
+      - WEBHOOK_EVENTS_QRCODE_UPDATED=false
+      - DEL_INSTANCE=false
+    volumes:
+      - evolution_instances:/evolution/instances
 
 volumes:
-  pgdata:
-
+  postgres_data:
+  evolution_instances:
